@@ -13,6 +13,7 @@ Brand-agnostic production kit for **voiced short-form Reels**, **paid ads** (9:1
 git clone https://github.com/burhanuddinpetiwala/reels-toolkit && cd reels-toolkit && bash setup.sh
 cp -r examples/sample-project ~/reels-projects/acme/black-friday   # then edit the JSONs, add assets/, vo/, music/
 P=~/reels-projects/acme/black-friday
+python3 rt/cutout.py $P <image url or file> fireplace   # transparent product cut-out -> assets/p/fireplace.png
 python3 rt/savings.py $P
 python3 rt/vo_pick.py $P R01 R02          # needs vo/r01_a.mp3, vo/r01_b.mp3 ...
 bash rt/render.sh $P R01 R02              # -> out/R01.mp4 + cover + qa

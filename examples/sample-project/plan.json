@@ -1,0 +1,53 @@
+{
+ "brand": "ValuHub",
+ "campaign": "sample",
+ "reels": [
+  {
+   "id": "R03",
+   "date": "2026-11-07",
+   "title": "Early deals are live",
+   "lines": [
+    {
+     "k": "hook",
+     "t": "It's live! Up to forty percent off, starting now."
+    },
+    {
+     "k": "fire",
+     "t": "Cozy nights in? This electric fireplace: save one hundred sixty-three dollars."
+    },
+    {
+     "k": "tree",
+     "t": "Hosting this year? This snowy seven-and-a-half-foot tree: save seventy-seven."
+    },
+    {
+     "k": "volume",
+     "t": "Up to forty percent off, plus volume discounts on trees and decor."
+    },
+    {
+     "k": "close",
+     "t": "Ends November nineteenth. Don't wait, grab yours today at ValuHub dot C A."
+    }
+   ],
+   "caption": {
+    "ig": "It's LIVE 🔥 Early Black Friday: up to 40% off.\nElectric fireplace → save $163\n7.5 ft snowy tree → save $77\nEnds Nov 19 👉 ValuHub.ca",
+    "fb": "",
+    "tags": "#EarlyBlackFriday #ShopCanada",
+    "story": "Countdown sticker + link sticker"
+   },
+   "audience": "renters, hosts",
+   "voice": "default",
+   "tone": "excited",
+   "products": [
+    {
+     "key": "fireplace",
+     "pct": 40
+    },
+    {
+     "key": "tree75",
+     "pct": 40
+    }
+   ],
+   "link": "https://valuhub.ca/collections/black-friday-holiday-deals"
+  }
+ ]
+}

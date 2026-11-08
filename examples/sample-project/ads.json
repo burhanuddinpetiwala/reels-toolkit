@@ -1,0 +1,58 @@
+[
+ {
+  "id": "ebf",
+  "voTake": "vo/ad_ebf_a.mp3",
+  "music": "project/music/default.mp3",
+  "pct": "40%",
+  "endsText": "Ends Nov 19",
+  "phase": "Early Black Friday",
+  "hero": "project/assets/nov/fire_life.jpg",
+  "hook1": "Wait.",
+  "hook2": [
+   "Black Friday deals",
+   "already started?!"
+  ],
+  "yes": "Yes!",
+  "anchors": {
+   "hook2": "black",
+   "yes": "yes",
+   "up": "up",
+   "items": [
+    [
+     "fireplace",
+     "save"
+    ],
+    [
+     "sofa",
+     "save"
+    ],
+    [
+     "snowy",
+     "save"
+    ]
+   ],
+   "ends": "ends",
+   "shop": "shop"
+  },
+  "items": [
+   {
+    "src": "project/assets/nov/fireplace.png",
+    "name": "Electric fireplace",
+    "save": "$163",
+    "h": 640
+   },
+   {
+    "src": "project/assets/nov/sofa.png",
+    "name": "Sofa bed",
+    "save": "$319",
+    "h": 520
+   },
+   {
+    "src": "project/assets/nov/tree75.png",
+    "name": "7.5 ft snowy tree",
+    "save": "$77",
+    "h": 900
+   }
+  ]
+ }
+]

@@ -1,0 +1,55 @@
+{
+ "name": "ValuHub",
+ "domain": "ValuHub.ca",
+ "domainSpoken": "ValuHub dot C A",
+ "cta": "Shop ValuHub.ca",
+ "issueKicker": "VALUHUB · NOVEMBER",
+ "currency": "$",
+ "colors": {
+  "primary": "#1F4A32",
+  "primaryDeep": "#143523",
+  "accent": "#E0A526",
+  "accentDeep": "#B9821A",
+  "light": "#FBF6EC",
+  "paper": "#F3EAD7",
+  "ink": "#1B231D",
+  "highlight": "#006400"
+ },
+ "fonts": {
+  "display": "Archivo Black",
+  "body": "Inter",
+  "script": "Caveat",
+  "serif": "Fraunces"
+ },
+ "logos": {
+  "mark": "assets/logo_mark.png",
+  "word": "assets/logo_word.png",
+  "full": "assets/logo.png",
+  "white": "assets/logo_white.png"
+ },
+ "aiLabel": true,
+ "voices": {
+  "default": {
+   "id": "JyzM229ZjDtptOZjn48b",
+   "name": "Kyle (excited, deals)"
+  },
+  "warm": {
+   "id": "hGQkZQUA5RiOXIw7P9iO",
+   "name": "warm female"
+  },
+  "calm": {
+   "id": "mJ5wtH88WGlTud22bihm",
+   "name": "Kathryn (calm)"
+  },
+  "ad": {
+   "id": "zDBYcuJrpuZ6YQ7AgRUw",
+   "name": "Jerry B. (radio DJ, paid ads)"
+  }
+ },
+ "rules": [
+  "No medical claims",
+  "No heating claims for fireplaces",
+  "Show savings, not prices",
+  "Never feature puzzles or board games"
+ ]
+}

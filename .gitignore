@@ -1,0 +1,6 @@
+remotion/node_modules/
+remotion/src/project
+remotion/public/project
+**/__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,138 @@
+{
+ "R03": {
+  "phase": "Early Black Friday",
+  "ticker": "EARLY BLACK FRIDAY \u00b7 UP TO 40% OFF \u00b7 ENDS NOV 19 \u00b7 VALUHUB.CA",
+  "end": {
+   "tagline": [
+    "Don't wait.",
+    "Grab yours today."
+   ],
+   "line": "Early Black Friday",
+   "bigLines": [
+    "Up to",
+    "40% off"
+   ],
+   "ends": "Ends Nov 19",
+   "note": "+ volume discounts on trees & decor",
+   "products": [
+    "project/assets/nov/fireplace.png",
+    "project/assets/nov/tree75.png",
+    "project/assets/nov/tree_prelit5.png"
+   ]
+  },
+  "scenes": [
+   {
+    "type": "slam",
+    "at": [
+     "hook"
+    ],
+    "photo": "project/assets/nov/fire_life.jpg",
+    "pos": "30% 50%",
+    "y": 420,
+    "lines": [
+     {
+      "t": "It's live!",
+      "size": 150
+     },
+     {
+      "t": "Up to 40% off",
+      "at": [
+       "hook",
+       "up"
+      ],
+      "size": 110
+     }
+    ],
+    "stamp": "EARLY BLACK FRIDAY",
+    "stampAt": [
+     "hook",
+     "now"
+    ],
+    "stampY": 1000,
+    "stampSize": 80
+   },
+   {
+    "type": "product",
+    "at": [
+     "fire"
+    ],
+    "title": "Electric fireplace",
+    "src": "project/assets/nov/fireplace.png",
+    "x": 520,
+    "y": 1560,
+    "h": 700,
+    "save": "$163",
+    "pct": "40% OFF",
+    "saveAt": [
+     "fire",
+     "save"
+    ],
+    "saveX": 820,
+    "saveY": 640
+   },
+   {
+    "type": "clip",
+    "at": [
+     "tree"
+    ],
+    "clip": "project/assets/nov/clips/ornament.mp4",
+    "label": "7.5 ft snowy tree",
+    "hero": "project/assets/nov/tree75.png",
+    "heroX": 850,
+    "heroH": 760,
+    "save": "$77",
+    "pct": "40% OFF",
+    "saveAt": [
+     "tree",
+     "save"
+    ],
+    "saveX": 300,
+    "saveY": 980
+   },
+   {
+    "type": "offer",
+    "at": [
+     "volume"
+    ],
+    "bg": "forest",
+    "kicker": "Up to",
+    "big": "40%",
+    "bigSub": "OFF",
+    "chips": [
+     {
+      "text": "+ volume discounts on trees & decor",
+      "at": [
+       "volume",
+       "volume"
+      ],
+      "y": 1020,
+      "size": 34,
+      "bg": "#FBF6EC"
+     }
+    ],
+    "stickers": [
+     "project/assets/nov/tree_prelit5.png",
+     "project/assets/nov/wreath.png"
+    ]
+   }
+  ],
+  "cover": {
+   "photo": "project/assets/nov/fire_life.jpg",
+   "photoPos": "30% 50%",
+   "kicker": "it's live",
+   "title": [
+    "Early",
+    "Black Friday"
+   ],
+   "badge": [
+    "UP TO",
+    "40%",
+    "OFF"
+   ],
+   "badgeX": 700,
+   "badgeY": 1060,
+   "ends": "Ends Nov 19"
+  },
+  "id": "N03"
+ }
+}

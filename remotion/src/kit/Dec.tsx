@@ -513,7 +513,7 @@ const GtaReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
       {/* objective subtitle box */}
       <Show from={objT} to={T(d, [items[0].line])}>
         <div style={{position: 'absolute', left: 90, top: 620, width: 900, background: 'rgba(0,0,0,0.78)', borderRadius: 10, padding: '28px 34px', fontFamily: FONT.body, fontWeight: 700, fontSize: 58, color: '#fff', lineHeight: 1.2, zIndex: 58, transform: `scale(${sp(frame, objT)})`}}>
-          Objective: grab the <span style={{color: '#f7e463'}}>deals</span> before they’re <span style={{color: '#ff6b6b'}}>gone</span>.
+          Objective: fix <span style={{color: '#f7e463'}}>holiday chaos</span> before the deals are <span style={{color: '#ff6b6b'}}>gone</span>.
         </div>
       </Show>
       {/* loading-screen art panels */}
@@ -530,7 +530,7 @@ const GtaReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
               <div style={{position: 'absolute', inset: 0, background: 'repeating-conic-gradient(from 0deg at 50% 60%, rgba(255,255,255,0.12) 0deg 10deg, transparent 10deg 20deg)'}} />
               <Img src={src(it.src)} style={{position: 'absolute', left: 420, top: 70, height: 560, maxWidth: 700, objectFit: 'contain', transform: 'translateX(-50%)', filter: 'drop-shadow(6px 0 0 #fff) drop-shadow(-6px 0 0 #fff) drop-shadow(0 6px 0 #fff) drop-shadow(0 -6px 0 #fff) drop-shadow(14px 14px 0 rgba(0,0,0,0.6)) contrast(1.15) saturate(1.25)'}} />
             </div></Punch>
-            {it.problem && <div style={{position: 'absolute', left: 100, top: 370, transform: `scale(${slam(frame, a, 1.8).s}) rotate(-2deg)`, transformOrigin: '0 50%', zIndex: 66, background: '#c62828', color: '#fff', fontFamily: 'Bebas Neue', fontSize: 84, letterSpacing: 3, padding: '6px 30px 2px', border: '6px solid #000', whiteSpace: 'nowrap'}}>{it.problem.toUpperCase()}</div>}
+            {it.problem && <div style={{position: 'absolute', left: 540, top: 640, transform: `translateX(-50%) scale(${slam(frame, a, 1.8).s}) rotate(-2deg)`, transformOrigin: '50% 50%', zIndex: 66, background: '#c62828', color: '#fff', fontFamily: 'Bebas Neue', fontSize: 84, letterSpacing: 3, padding: '6px 30px 2px', border: '6px solid #000', whiteSpace: 'nowrap'}}>{it.problem.toUpperCase()}</div>}
             <div style={{position: 'absolute', left: 110, top: 455, zIndex: 65, background: '#0d0d0d', color: '#fff', fontFamily: 'Bebas Neue', fontSize: 80, letterSpacing: 4, lineHeight: 1.15, padding: '8px 26px 4px', transform: `rotate(-3deg) translateX(${(1 - k) * -700}px)`}}>{it.label.toUpperCase()}</div>
             {t >= sAt && <div style={{position: 'absolute', left: 540, top: 760 + up * 1.2, transform: 'translateX(-50%)', fontFamily: 'Bebas Neue', fontSize: 110, color: '#7CF27C', ...OUT('#08210b', 10), zIndex: 59, opacity: interpolate(frame, [fr(sAt + 0.6), fr(sAt + 0.9)], [1, 0], cl)}}>+ UP TO ${it.save}</div>}
             {t >= sAt && <div style={{position: 'absolute', left: 540, top: 1150, transform: `translateX(-50%) scale(${sp(frame, sAt + 0.1)})`, background: '#f7e463', color: '#111', fontFamily: FONT.display, fontSize: 64, padding: '6px 28px', border: '6px solid #111', zIndex: 58}}>SAVE UP TO ${it.save}</div>}

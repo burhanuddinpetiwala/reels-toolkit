@@ -53,6 +53,11 @@ def money_pass(words):
     while i < len(words):
         out.append(words[i])
         prev = strip(words[i]['w']).lower()
+        need_d = False
+        if prev == 'to' and i > 0 and strip(words[i - 1]['w']).lower() == 'up':
+            prev, need_d = 'save', True  # 'up to N dollars' (not 'up to N percent')
+        if prev == 'and':
+            prev, need_d = 'save', True  # '..., and sixty-four dollars'
         if prev in ('save', 'over') and i + 1 < len(words):
             j, val, used = i + 1, None, []
             toks = [strip(w['w']).lower() for w in words[j:j + 5]]
@@ -70,6 +75,8 @@ def money_pass(words):
                     val = v0
             has_d = j + k < len(words) and strip(words[j + k]['w']).lower() == 'dollars'
             if val is not None and prev == 'over' and not has_d and val < 100:
+                val = None
+            if need_d and not has_d:
                 val = None
             if val is not None:
                 if has_d: k += 1

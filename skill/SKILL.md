@@ -76,6 +76,12 @@ If the user is away, take the recommended options, state them at the top of the 
 - Lifestyle photos and clips go in `assets/photos` and `assets/clips` (mp4, 3–5 s). Use the store's own photos first. Generated imagery must match the real product and contain no other brands, real people or text.
 - Music: put `music/default.mp3` in place (instrumental, about 35 s).
 
+## Before Phase 4: read the craft rules
+- Read `docs/VIRAL-CRAFT.md` (distilled from the vetted skills in `vendor-skills/`, see `vendor-skills/INDEX.md`). Open the matching vendored skill when a Reel needs it: hooks → `vendor-skills/varg/product-video-hooks`, ad structure → `vendor-skills/varg/ecommerce-video-ads`, pacing and captions → `vendor-skills/iart-tiktok-video`, shot mechanics → `vendor-skills/product-shot-cards/shots`, review → `vendor-skills/claude-motion/review-loop`.
+- Scripts follow problem → solution → saving, with each product's benefit taken from its listing.
+- Give every Reel in a campaign its own visual style matched to its audience. `specs.json` entries with `"style"` render through `remotion/src/kit/Dec.tsx`: `glitch` (deal list), `split` (A/B poll), `ba` (before/after rooms), `gta` (game-HUD parody, original art only), `ugc` (host clips + reveal), `info` (checklist infographic). Story frames with `"style"` use `kit/StoryDec.tsx` (no sticker box). `links.json` renders transparent link-button PNGs.
+- Cast a different voice per audience. Energetic defaults the user approved: Drew `q0IMILNRPxOgtBTS4taI` (male) and Amy `V2eZElP7Lz5raPWtjrET` (female).
+
 ## Phase 4: Scripts and voiceover
 1. Write `plan.json` lines for each Reel, following docs/COPY.md.
    - The hook comes first and names the audience.

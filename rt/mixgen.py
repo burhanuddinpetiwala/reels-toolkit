@@ -24,7 +24,9 @@ def main(P, id):
     A = lambda n, t, db: sfx.append({'name': n, 'at': round(max(0, t), 3), 'db': db})
     s = S[id]
     end = d['endCardStart']
-    for i, sc in enumerate(s['scenes']):
+    for c in s.get('sfx', []):  # explicit cue list (Dec styles): {name, at:[line,word,n], dt, db}
+        A(c['name'], wt(d, c['at']) + c.get('dt', 0), c.get('db', -15))
+    for i, sc in enumerate(s.get('scenes', [])):
         t = 0 if i == 0 else wt(d, sc['at'])
         if t >= end:
             continue
@@ -70,9 +72,8 @@ def main(P, id):
                     A('pop', wt(d, it['at']) + 0.4, -14)
         if sc.get('button'):
             A('cat_bell', wt(d, sc['buttonAt']), -15)
-    A('sparkle', end, -14)
-    A('stamp', end + 0.9, -16)
-    A('knob_click', end + 2.25, -14)
+    for n, dt, db in s.get('endSfx', [['sparkle', 0, -14], ['stamp', 0.9, -16], ['knob_click', 2.25, -14]]):
+        A(n, end + dt, db)
     m = r.get('music') or next((x for x in (f'music/{id.lower()}.mp3', 'music/default.mp3') if os.path.exists(f'{P}/{x}')), None)
     if not m:
         sys.exit(f'{id}: no music. Put music/{id.lower()}.mp3 or music/default.mp3 in the project, or set "music" in plan.json')

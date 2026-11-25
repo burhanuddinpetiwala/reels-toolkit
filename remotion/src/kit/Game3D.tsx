@@ -9,6 +9,7 @@ import {useThree} from '@react-three/fiber';
 import {Captions} from '../components/Captions';
 import {VideoData, wt} from '../components/timeline';
 import {N, FONT, BRAND} from '../theme';
+import {Human, useHumanAssets} from './Human';
 
 const FPS = 30;
 const cl = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -270,6 +271,7 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   const t = frame / fps;
   const end = d.endCardStart;
   const items = spec.items as {line: string; label: string; problem: string; name: string; benefit: string; src: string; save: number; color: string; pick: At}[];
+  const human = useHumanAssets();
   const objT = T(d, ['obj']);
   const passT = T(d, ['pass']);
   const picks = items.map((it) => T(d, it.pick));
@@ -284,7 +286,7 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
     {from: 0, cam: (k) => { const e = smooth(k); return {pos: [lerp(0, 0, e), lerp(38, 3.4, e), lerp(26, pz + 7.5, e)], look: [0, lerp(0, 1.6, e), lerp(-30, pz - 6, e)], fov: 55}; }},
     {from: objT, cam: () => ({pos: [Math.sin(t * 1.3) * 0.4, 2.9, pz + 5.6], look: [0, 1.5, pz - 8], fov: 58})},
     {from: T(d, [items[0].line]), cam: (k) => ({pos: [2.6 - k, 2.3, pz - 6.5], look: [0, 1.4, pz], fov: t > picks[0] && t < picks[0] + 0.25 ? 40 : 52})},
-    {from: T(d, [items[1].line]), cam: (k) => ({pos: [-3.2 + k * 1.5, 3.4, pz + 6], look: [0, 1.2, pz - 7], fov: t > picks[1] && t < picks[1] + 0.25 ? 40 : 54})},
+    {from: T(d, [items[1].line]), cam: (k) => ({pos: [-2.6 + k * 1.2, 2.6, pz + 5.2], look: [0, 1.3, pz - 2], fov: t > picks[1] && t < picks[1] + 0.25 ? 40 : 54})},
     {from: T(d, [items[2].line]), cam: (k) => { const a = -0.9 + k * 1.6; return {pos: [Math.sin(a) * 7, 2.4, pz + Math.cos(a) * 7], look: [0, 1.4, pz - 1], fov: 48}; }},
     {from: passT, cam: (k) => { const a = 2.6 + k * 1.4; return {pos: [Math.sin(a) * 6.5, 2.2 + k * 0.6, pz + Math.cos(a) * 6.5], look: [0, 2, pz], fov: 52}; }},
   ];
@@ -307,7 +309,7 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
 
   return (
     <AbsoluteFill style={{background: '#1a0d2b'}}>
-      {t < end && (
+      {t < end && human && (
         <ThreeCanvas width={width} height={height} linear flat={false}>
           <color attach="background" args={['#6a3a8c']} />
           <fog attach="fog" args={['#8a4f8f', 30, 190]} />
@@ -315,10 +317,12 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
           <directionalLight position={[-20, 30, -60]} intensity={1.4} color="#ffc38a" />
           <ambientLight intensity={0.5} />
           <Rig pos={pos} look={cam.look} fov={cam.fov} />
+          <pointLight position={[1.8, 3.6, pz + 2.6]} intensity={45} distance={14} color="#ffe2c4" />
+          <pointLight position={[-2.2, 3.0, pz - 2.8]} intensity={30} distance={12} color="#9ad0ff" />
           <City />
           <Snow t={t} cz={pz} />
           {items.map((it, i) => <Loot key={i} z={lootZ[i]} t={t} hit={picks[i]} color={it.color} />)}
-          <Player x={0} z={pz} t={t} run={run} cheer={cheer} yaw={t > passT ? Math.PI * smooth(Math.min(1, (t - passT) / 0.5)) : 0} />
+          <Human data={human} x={0} z={pz} t={t} run={run} jumpAt={passT + 0.15} yaw={t > passT ? Math.PI * smooth(Math.min(1, (t - passT) / 0.5)) : 0} height={2.15} outfit={{top: '#1f6b4a', bottom: '#4a5568', shoes: '#26262c'}} />
           <Fireworks t={t} t0={passT + 0.2} z={pz} />
         </ThreeCanvas>
       )}

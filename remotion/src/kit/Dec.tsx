@@ -407,7 +407,7 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
             {p > 0 && p < 1 && <div style={{position: 'absolute', left: p * 1080 - 6, top: 0, width: 12, height: 1920, background: '#fff', boxShadow: '0 0 30px rgba(255,255,255,0.9)', zIndex: 30}} />}
             <AbsoluteFill style={{background: 'linear-gradient(rgba(0,0,0,0.45), transparent 30%, transparent 62%, rgba(0,0,0,0.35))'}} />
             <div style={{position: 'absolute', left: 70, top: 290, fontFamily: FONT.display, fontSize: 84, color: '#fff', textShadow: '0 4px 18px rgba(0,0,0,0.5)', transform: `translateX(${(1 - sp(frame, a)) * -600}px)`}}>{`${i + 1}. ${s.label}`}</div>
-            {p < 0.5 ? <Stamp text="BEFORE" at={a + 0.15} x={700} y={440} color={red} /> : <Stamp text="AFTER" at={w + 0.25} x={700} y={440} color={green} rot={6} />}
+            {p < 0.5 ? <Stamp text="BEFORE" at={a + 0.15} x={620} y={440} color={red} /> : <Stamp text="AFTER" at={w + 0.25} x={700} y={440} color={green} rot={6} />}
             {s.chips.map((c, j) => <Pill key={c.text} text={c.text} at={T(d, c.at)} x={70} y={1020 + j * 92} bg={N.mustard} color={N.forestDeep} size={42} rot={j % 2 ? 2 : -2} />)}
           </Show>
         );
@@ -415,12 +415,12 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
       {t >= offT && (
         <AbsoluteFill style={{background: N.forest}}>
           <div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, letterSpacing: 4, color: N.cream, fontSize: 46}}>CYBER WEEK · UP TO</div>
-          <div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: FONT.display, color: N.mustard, fontSize: 220, lineHeight: 1, transform: `scale(${sp(frame, offT)})`}}>50% OFF</div>
+          <div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: FONT.display, color: N.mustard, fontSize: 190, lineHeight: 1, transform: `scale(${sp(frame, offT)})`}}>50% OFF</div>
           {spec.saves.map((s: any, i: number) => (
-            <div key={i} style={{position: 'absolute', left: i ? 560 : 80, top: 640, width: 440, height: 430, borderRadius: 30, background: N.cream, transform: `translateY(${(1 - sp(frame, T(d, s.at))) * 900}px) rotate(${i ? 2 : -2}deg)`, boxShadow: '0 20px 40px rgba(0,0,0,0.3)'}}>
+            <div key={i} style={{position: 'absolute', left: spec.saves.length === 1 ? 320 : i ? 560 : 80, top: 640, width: 440, height: 430, borderRadius: 30, background: N.cream, transform: `translateY(${(1 - sp(frame, offT + 0.5 + i * 0.2)) * 900}px) rotate(${i ? 2 : -2}deg)`, boxShadow: '0 20px 40px rgba(0,0,0,0.3)'}}>
               <Img src={src(s.src)} style={{position: 'absolute', left: 220, top: 30, height: 230, transform: 'translateX(-50%)', objectFit: 'contain', maxWidth: 380}} />
               <div style={{position: 'absolute', top: 270, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, fontSize: 32, color: N.ink}}>{s.label}</div>
-              <div style={{position: 'absolute', top: 315, width: '100%', display: 'flex', justifyContent: 'center', gap: 14, fontFamily: FONT.display, fontSize: 70, color: N.forest}}>UP TO <Odo value={s.save} at={T(d, s.at)} h={84} /></div>
+              {t >= T(d, s.at) - 0.1 ? <div style={{position: 'absolute', top: 315, width: '100%', display: 'flex', justifyContent: 'center', gap: 14, fontFamily: FONT.display, fontSize: 70, color: N.forest}}>UP TO <Odo value={s.save} at={T(d, s.at)} h={84} /></div> : <div style={{position: 'absolute', top: 315, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: 70, color: N.forest}}>UP TO 50%</div>}
             </div>
           ))}
         </AbsoluteFill>

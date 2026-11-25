@@ -7,10 +7,10 @@ mkdir -p "$P/out" "$P/qa" "$P/logs"
 for id in "$@"; do
   t0=$(date +%s)
   cd "$RT/remotion"
-  if ! npx remotion render src/index.ts "$id" "$P/out/${id}_silent.mp4" --codec=h264 --crf=18 --pixel-format=yuv420p --muted --concurrency=${RT_CONCURRENCY:-2} --log=error > "$P/logs/render_$id.log" 2>&1; then
+  if ! npx remotion render src/index.ts "$id" "$P/out/${id}_silent.mp4" --codec=h264 --crf=18 --pixel-format=yuv420p --muted --concurrency=${RT_CONCURRENCY:-2} --gl=${RT_GL:-swangle} --log=error > "$P/logs/render_$id.log" 2>&1; then
     echo "$id RENDER_FAIL $(tail -3 "$P/logs/render_$id.log" | tr '\n' ' ')"; continue
   fi
-  npx remotion still src/index.ts "C-$id" "$P/out/cover_$id.png" --log=error > /dev/null 2>&1 || echo "$id (no cover)"
+  npx remotion still src/index.ts "C-$id" "$P/out/cover_$id.png" --gl=${RT_GL:-swangle} --log=error > /dev/null 2>&1 || echo "$id (no cover)"
   cd "$RT"
   python3 rt/mixgen.py "$P" "$id" > /dev/null || { echo "$id MIXGEN_FAIL"; continue; }
   python3 rt/mix.py "$P" "$id" > "$P/logs/mix_$id.log" 2>&1 || { echo "$id MIX_FAIL $(tail -2 "$P/logs/mix_$id.log")"; continue; }

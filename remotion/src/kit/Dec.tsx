@@ -10,6 +10,7 @@ import {AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, random, spring
 import {Captions, CaptionStyle} from '../components/Captions';
 import {VideoData, wt as wtw} from '../components/timeline';
 import {N, FONT, BRAND} from '../theme';
+import {GameReel} from './Game3D';
 const LOGO = {white: BRAND.logoWhite as string, full: BRAND.logo as string};
 
 const FPS = 30;
@@ -406,7 +407,7 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
             {p > 0 && p < 1 && <div style={{position: 'absolute', left: p * 1080 - 6, top: 0, width: 12, height: 1920, background: '#fff', boxShadow: '0 0 30px rgba(255,255,255,0.9)', zIndex: 30}} />}
             <AbsoluteFill style={{background: 'linear-gradient(rgba(0,0,0,0.45), transparent 30%, transparent 62%, rgba(0,0,0,0.35))'}} />
             <div style={{position: 'absolute', left: 70, top: 290, fontFamily: FONT.display, fontSize: 84, color: '#fff', textShadow: '0 4px 18px rgba(0,0,0,0.5)', transform: `translateX(${(1 - sp(frame, a)) * -600}px)`}}>{`${i + 1}. ${s.label}`}</div>
-            {p < 0.5 ? <Stamp text="BEFORE" at={a + 0.15} x={680} y={300} color={red} /> : <Stamp text="AFTER" at={w + 0.25} x={700} y={300} color={green} rot={6} />}
+            {p < 0.5 ? <Stamp text="BEFORE" at={a + 0.15} x={700} y={440} color={red} /> : <Stamp text="AFTER" at={w + 0.25} x={700} y={440} color={green} rot={6} />}
             {s.chips.map((c, j) => <Pill key={c.text} text={c.text} at={T(d, c.at)} x={70} y={1020 + j * 92} bg={N.mustard} color={N.forestDeep} size={42} rot={j % 2 ? 2 : -2} />)}
           </Show>
         );
@@ -680,9 +681,151 @@ const InfoReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   );
 };
 
+// ---------- 2b. SWIPE (dating-app parody, high energy) ----------
+const Heart: React.FC<{size: number; color: string}> = ({size, color}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.2C.3 8.4 2.2 4.5 6 4.5c2.2 0 3.6 1.2 4.4 2.5h3.2c.8-1.3 2.2-2.5 4.4-2.5 3.8 0 5.7 3.9 4 7.3C19.5 16.4 12 21 12 21z" fill={color} stroke="#fff" strokeWidth={1.2} /></svg>
+);
+const HeartBurst: React.FC<{at: number; x: number; y: number}> = ({at, x, y}) => {
+  const frame = useCurrentFrame();
+  if (frame < fr(at)) return null;
+  const k = (frame - fr(at)) / FPS;
+  if (k > 1.2) return null;
+  return (
+    <>
+      {[...Array(14)].map((_, i) => {
+        const a = (i / 14) * Math.PI * 2 + random(`hb${i}`) * 0.4;
+        const r = 120 + k * (520 + random(`hr${i}`) * 300);
+        return <div key={i} style={{position: 'absolute', left: x + Math.cos(a) * r - 40, top: y + Math.sin(a) * r - 40 - k * 200, opacity: 1 - k / 1.2, transform: `rotate(${(random(`ht${i}`) - 0.5) * 60}deg) scale(${0.6 + random(`hs${i}`) * 0.8})`, zIndex: 70}}><Heart size={80} color={i % 3 ? '#ff4d7d' : '#ffd23f'} /></div>;
+      })}
+    </>
+  );
+};
+const PartyBG: React.FC = () => {
+  const frame = useCurrentFrame();
+  const t = frame / FPS;
+  const beat = Math.exp(-((t % 0.469) / 0.09));
+  return (
+    <AbsoluteFill style={{overflow: 'hidden'}}>
+      <AbsoluteFill style={{background: `linear-gradient(${150 + Math.sin(t * 0.8) * 25}deg, #ff3d7f 0%, #8a3ffc 55%, #ff9f1c 100%)`}} />
+      {[...Array(6)].map((_, i) => (
+        <div key={i} style={{position: 'absolute', left: 540 + Math.sin(t * 0.7 + i * 1.7) * 420 - 260, top: 960 + Math.cos(t * 0.5 + i * 2.3) * 760 - 260, width: 520, height: 520, borderRadius: 999, background: ['#ffd23f', '#00e0c6', '#ff4d7d', '#ffffff', '#7b5cff', '#ff9f1c'][i], opacity: 0.22 + beat * 0.08, filter: 'blur(70px)'}} />
+      ))}
+      {[...Array(40)].map((_, i) => {
+        const x = (random(`sx${i}`) * 1080 + Math.sin(t + i) * 30) % 1080;
+        const y = ((random(`sy${i}`) * 1920 + t * (90 + random(`sv${i}`) * 120)) % 2000) - 40;
+        return <div key={i} style={{position: 'absolute', left: x, top: y, width: 10, height: 10, borderRadius: 9, background: '#fff', opacity: 0.7}} />;
+      })}
+    </AbsoluteFill>
+  );
+};
+const SwipeCard: React.FC<{photo: string; name: string; sub: string; chips: {text: string; at: number}[]; inAt: number; outAt: number; dir: number; accent: string}> = ({photo, name, sub, chips, inAt, outAt, dir, accent}) => {
+  const frame = useCurrentFrame();
+  const t = frame / FPS;
+  if (t < inAt) return null;
+  const s = slam(frame, inAt, 1.9);
+  const o = t < outAt ? 0 : Math.min(1, (t - outAt) / 0.35);
+  const oe = o * o;
+  const kb = 1.04 + (t - inAt) * 0.02;
+  return (
+    <div style={{position: 'absolute', left: 120, top: 330, width: 840, height: 1120, borderRadius: 44, overflow: 'hidden', background: '#111', boxShadow: '0 40px 80px rgba(0,0,0,0.45)', transform: `translateX(${oe * 1300 * dir}px) rotate(${oe * 24 * dir + (1 - s.s) * -6}deg) scale(${s.s})`, opacity: s.o, zIndex: 30}}>
+      <Img src={src(photo)} style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${kb})`}} />
+      <AbsoluteFill style={{background: 'linear-gradient(transparent 45%, rgba(0,0,0,0.8))'}} />
+      <div style={{position: 'absolute', left: 44, bottom: 230, color: '#fff', fontFamily: FONT.display, fontSize: 92, lineHeight: 1}}>{name}</div>
+      <div style={{position: 'absolute', left: 48, bottom: 180, color: '#ffe3ef', fontFamily: FONT.body, fontWeight: 800, fontSize: 40}}>{sub}</div>
+      <div style={{position: 'absolute', left: 44, bottom: 40, right: 44, display: 'flex', flexWrap: 'wrap', gap: 14}}>
+        {chips.map((c) => {
+          const k = sp(frame, c.at, {damping: 9, stiffness: 260, mass: 0.5});
+          return t >= c.at ? <div key={c.text} style={{transform: `scale(${k})`, background: accent, color: '#fff', fontFamily: FONT.body, fontWeight: 800, fontSize: 38, padding: '10px 24px', borderRadius: 999, border: '4px solid #fff'}}>✓ {c.text}</div> : null;
+        })}
+      </div>
+      {o > 0 && <div style={{position: 'absolute', left: 60, top: 80, transform: `rotate(-14deg) scale(${1.6 - 0.6 * Math.min(1, o * 3)})`, border: '10px solid #2bd96b', color: '#2bd96b', fontFamily: FONT.display, fontSize: 120, padding: '0 28px', borderRadius: 18, background: 'rgba(255,255,255,0.85)'}}>LIKE</div>}
+    </div>
+  );
+};
+const SwipeReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
+  const frame = useCurrentFrame();
+  const t = frame / FPS;
+  const end = d.endCardStart;
+  const dateT = T(d, ['date']), aT = T(d, ['a']), bT = T(d, ['b']), askT = T(d, ['ask']), offT = T(d, ['offer']);
+  const decT = T(d, ['hook', 'dec']), noT = T(d, ['hook', 'still']);
+  const A = spec.a, B = spec.b;
+  const shout = (txt: string, at: number, y: number, size: number, color: string, rot = -3) => {
+    const s = slam(frame, at, 2.6);
+    const df = frame - fr(at);
+    const shk = df >= 6 && df < 14 ? 12 * Math.exp(-(df - 6) / 2) * Math.sin(df * 3) : 0;
+    return <div style={{position: 'absolute', top: y, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: size, lineHeight: 0.92, color, transform: `translateX(${shk}px) scale(${s.s}) rotate(${rot}deg)`, opacity: s.o, textShadow: '0 10px 0 rgba(0,0,0,0.25)', whiteSpace: 'pre', zIndex: 40}}>{txt}</div>;
+  };
+  return (
+    <AbsoluteFill>
+      <PartyBG />
+      {/* HOOK: three hard cuts */}
+      {t < decT && shout('WAIT!', 0, 620, 300, '#ffffff')}
+      {t >= decT && t < noT && shout("IT'S\nDECEMBER", decT, 540, 160, '#ffffff', 3)}
+      {t >= noT && t < dateT && (
+        <>
+          {shout('NO TREE?!', noT, 420, 190, '#ffd23f')}
+          <svg width={420} height={640} viewBox="0 0 100 150" style={{position: 'absolute', left: 330, top: 700, transform: `rotate(${Math.sin(t * 18) * 3}deg)`, zIndex: 35}}>
+            <path d="M50 8 L78 58 L64 58 L88 98 L70 98 L94 138 L6 138 L30 98 L12 98 L36 58 L22 58 Z" fill="none" stroke="#fff" strokeWidth={4} strokeDasharray="8 7" />
+            <text x={50} y={110} textAnchor="middle" fontSize={44} fontFamily="Archivo Black" fill="#fff">?</text>
+          </svg>
+        </>
+      )}
+      {/* DATE: app intro */}
+      {t >= dateT && t < aT && (
+        <>
+          {shout("LET'S\nSPEED-DATE", dateT, 470, 136, '#ffffff')}
+          <div style={{position: 'absolute', left: 540, top: 900, transform: `translateX(-50%) scale(${0.5 + 0.5 * sp(frame, dateT + 0.15)}) rotate(${Math.sin(t * 9) * 6}deg)`, zIndex: 41}}><Heart size={300} color="#ff4d7d" /></div>
+        </>
+      )}
+      {/* CARDS */}
+      <SwipeCard photo={A.photo} name={A.name} sub={A.sub} accent="#ff4d7d" dir={1} inAt={aT} outAt={bT - 0.4} chips={A.chips.map((c: any) => ({text: c.text, at: T(d, c.at)}))} />
+      <HeartBurst at={bT - 0.3} x={540} y={800} />
+      <SwipeCard photo={B.photo} name={B.name} sub={B.sub} accent="#8a3ffc" dir={1} inAt={bT} outAt={askT - 0.35} chips={B.chips.map((c: any) => ({text: c.text, at: T(d, c.at)}))} />
+      <HeartBurst at={askT - 0.25} x={540} y={800} />
+      {t >= aT && t < askT && (
+        <div style={{position: 'absolute', top: 210, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: 64, color: '#fff', zIndex: 45, textShadow: '0 6px 0 rgba(0,0,0,0.25)'}}>{t < bT ? 'TREE A' : 'TREE B'}</div>
+      )}
+      {/* ASK */}
+      {t >= askT && t < offT && (
+        <>
+          {[A, B].map((c: any, i: number) => {
+            const k = slam(frame, askT + i * 0.08, 1.8);
+            const hi = Math.floor(t * 4) % 2 === i;
+            return (
+              <div key={i} style={{position: 'absolute', left: i ? 560 : 60, top: 560, width: 460, height: 640, borderRadius: 30, overflow: 'hidden', border: `10px solid ${hi ? '#ffd23f' : '#fff'}`, transform: `rotate(${i ? 5 : -5}deg) scale(${k.s * (hi ? 1.04 : 1)})`, opacity: k.o, boxShadow: '0 30px 60px rgba(0,0,0,0.4)', zIndex: 30}}>
+                <Img src={src(c.photo)} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, background: i ? '#8a3ffc' : '#ff4d7d', color: '#fff', textAlign: 'center', fontFamily: FONT.display, fontSize: 110}}>{i ? 'B' : 'A'}</div>
+              </div>
+            );
+          })}
+          {shout('A OR B?', askT, 300, 190, '#ffffff')}
+          <div style={{position: 'absolute', left: 540, top: 1230, transform: `translateX(-50%) translateY(${Math.abs(Math.sin(t * 7)) * -26}px) scale(${sp(frame, askT + 0.2)})`, background: '#fff', color: '#2b1e2f', fontFamily: FONT.display, fontSize: 56, padding: '14px 36px', borderRadius: 999, zIndex: 50, whiteSpace: 'nowrap'}}>COMMENT NOW 💬</div>
+        </>
+      )}
+      {/* OFFER: it's a match */}
+      {t >= offT && t < end && (
+        <>
+          {[A, B].map((c: any, i: number) => {
+            const k = slam(frame, offT + 0.05 + i * 0.1, 2);
+            return <div key={i} style={{position: 'absolute', left: i ? 520 : 180, top: 820, width: 380, height: 380, borderRadius: 999, overflow: 'hidden', border: '12px solid #fff', transform: `scale(${k.s}) rotate(${i ? 8 : -8}deg)`, opacity: k.o, zIndex: 30, boxShadow: '0 20px 50px rgba(0,0,0,0.35)'}}><Img src={src(c.photo)} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></div>;
+          })}
+          <div style={{position: 'absolute', left: 540, top: 930, transform: `translateX(-50%) scale(${sp(frame, offT + 0.3) * (1 + 0.08 * Math.exp(-((t % 0.469) / 0.1)))})`, zIndex: 40}}><Heart size={200} color="#ff4d7d" /></div>
+          {shout("IT'S A DEAL!", offT, 300, 128, '#ffd23f')}
+          {shout('UP TO 50% OFF', T(d, ['offer', 'up']), 480, 104, '#ffffff', 2)}
+          {t >= T(d, ['offer', '$']) && <div style={{position: 'absolute', left: 540, top: 660, transform: `translateX(-50%) scale(${slam(frame, T(d, ['offer', '$']), 1.8).s})`, background: '#2b1e2f', color: '#fff', fontFamily: FONT.display, fontSize: 60, padding: '12px 36px', borderRadius: 999, whiteSpace: 'nowrap', display: 'flex', gap: 14, alignItems: 'center', zIndex: 45}}>SAVE UP TO <Odo value={spec.save} at={T(d, ['offer', '$'])} h={70} /></div>}
+          <Confetti at={offT + 0.3} />
+        </>
+      )}
+      <Grain amount={0.06} vignette={0.25} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 54, weight: 800, color: '#ffffff', active: '#ffd23f', bg: null, y: 1236, shadow: '0 0 8px rgba(0,0,0,0.9), 3px 3px 0 #000, -2px -2px 0 #000'}} />
+      <EndCard at={end} theme={{bg: 'linear-gradient(150deg, #ff3d7f, #8a3ffc)', fg: '#ffffff', accent: '#ffd23f', btnBg: '#ffffff', btnFg: '#8a3ffc', logo: 'white'}} kicker="Cyber Week · up to" big="50% OFF" sub="Order early for Christmas" products={spec.endProducts} />
+    </AbsoluteFill>
+  );
+};
+
 // ---------- router ----------
 export const makeDec = (spec: any, d: VideoData) => {
-  const C = {glitch: GlitchReel, split: SplitReel, ba: BAReel, gta: GtaReel, ugc: UgcReel, info: InfoReel}[spec.style as string] as React.FC<{spec: any; d: VideoData}>;
+  const C = {glitch: GlitchReel, split: SplitReel, ba: BAReel, gta: GtaReel, game3d: GameReel, swipe: SwipeReel, ugc: UgcReel, info: InfoReel}[spec.style as string] as React.FC<{spec: any; d: VideoData}>;
   const Comp: React.FC = () => <C spec={spec} d={d} />;
   return Comp;
 };

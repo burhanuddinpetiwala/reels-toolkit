@@ -10,6 +10,7 @@ import {Captions} from '../components/Captions';
 import {VideoData, wt} from '../components/timeline';
 import {N, FONT, BRAND} from '../theme';
 import {Human, useHumanAssets} from './Human';
+import {BrandBG, L, LIGHT_CAPTIONS} from './BrandBG';
 
 const FPS = 30;
 const cl = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -40,10 +41,10 @@ const useWindowTexture = () =>
     c.width = 64; c.height = 128;
     const g = c.getContext('2d')!;
     const r = mulberry(7);
-    g.fillStyle = '#1c0f2b'; g.fillRect(0, 0, 64, 128);
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 64, 128);
     for (let y = 4; y < 128; y += 12) for (let x = 4; x < 64; x += 12) {
       const on = r() > 0.45;
-      g.fillStyle = on ? (r() > 0.5 ? '#ffd27a' : '#ffb36b') : '#2a1a3d';
+      g.fillStyle = on ? (r() > 0.7 ? '#e9c877' : '#7f9c8a') : '#5f7d6b';
       g.fillRect(x, y, 7, 8);
     }
     const tx = new THREE.CanvasTexture(c);
@@ -62,7 +63,7 @@ const City: React.FC = () => {
       let z = 25;
       while (z > -260) {
         const w = 6 + r() * 6, d = 6 + r() * 8, h = 8 + r() * 34;
-        out.push({x: side * (9 + w / 2 + r() * 2), z: z - d / 2, w, d, h, c: ['#3a1f55', '#2d1846', '#47245f', '#25153a'][Math.floor(r() * 4)]});
+        out.push({x: side * (9 + w / 2 + r() * 2), z: z - d / 2, w, d, h, c: ['#F4EFE7', '#E8DFCE', '#D9E4D7', '#C8D8C6'][Math.floor(r() * 4)]});
         z -= d + 1 + r() * 3;
       }
     }
@@ -76,19 +77,19 @@ const City: React.FC = () => {
       const tx = win.clone();
       tx.needsUpdate = true;
       tx.repeat.set(Math.max(1, Math.round(b.w / 3)), Math.max(1, Math.round(b.h / 5)));
-      m[key] = new THREE.MeshStandardMaterial({color: b.c, emissiveMap: tx, emissive: new THREE.Color('#ffffff'), emissiveIntensity: 0.9, roughness: 0.9});
+      m[key] = new THREE.MeshStandardMaterial({color: b.c, map: tx, roughness: 0.85});
     }
     return m;
   }, [blds, win]);
   return (
     <group>
       {/* road, sidewalks, snow banks */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -120]}><planeGeometry args={[14, 320]} /><meshStandardMaterial color="#4a4058" roughness={0.9} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -120]}><planeGeometry args={[14, 320]} /><meshStandardMaterial color="#9a978c" roughness={0.9} /></mesh>
       {[-1, 1].map((s) => (
-        <mesh key={s} rotation={[-Math.PI / 2, 0, 0]} position={[s * 8.5, 0.05, -120]}><planeGeometry args={[3, 320]} /><meshStandardMaterial color="#d9dcef" roughness={1} /></mesh>
+        <mesh key={s} rotation={[-Math.PI / 2, 0, 0]} position={[s * 8.5, 0.05, -120]}><planeGeometry args={[3, 320]} /><meshStandardMaterial color="#ECE4D4" roughness={1} /></mesh>
       ))}
       {[...Array(40)].map((_, i) => (
-        <mesh key={i} position={[0, 0.02, 20 - i * 8]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[0.35, 3.2]} /><meshBasicMaterial color="#ffd27a" /></mesh>
+        <mesh key={i} position={[0, 0.02, 20 - i * 8]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[0.35, 3.2]} /><meshBasicMaterial color="#E0A526" /></mesh>
       ))}
       {blds.map((b, i) => (
         <mesh key={i} position={[b.x, b.h / 2, b.z]} material={mats[`${b.c}-${Math.round(b.w)}-${Math.round(b.h)}`]}>
@@ -97,20 +98,20 @@ const City: React.FC = () => {
       ))}
       {/* roof snow caps */}
       {blds.map((b, i) => (
-        <mesh key={`s${i}`} position={[b.x, b.h + 0.15, b.z]}><boxGeometry args={[b.w + 0.2, 0.3, b.d + 0.2]} /><meshStandardMaterial color="#eef1ff" /></mesh>
+        <mesh key={`s${i}`} position={[b.x, b.h + 0.15, b.z]}><boxGeometry args={[b.w + 0.2, 0.3, b.d + 0.2]} /><meshStandardMaterial color="#1F4A32" /></mesh>
       ))}
       {/* street lamps with glowing bulbs */}
       {[...Array(18)].map((_, i) =>
         [-1, 1].map((s) => (
           <group key={`${i}${s}`} position={[s * 7.4, 0, 14 - i * 16]}>
-            <mesh position={[0, 2.6, 0]}><cylinderGeometry args={[0.08, 0.1, 5.2, 6]} /><meshStandardMaterial color="#1a1220" /></mesh>
-            <mesh position={[-s * 0.6, 5.2, 0]}><boxGeometry args={[1.3, 0.12, 0.12]} /><meshStandardMaterial color="#1a1220" /></mesh>
+            <mesh position={[0, 2.6, 0]}><cylinderGeometry args={[0.08, 0.1, 5.2, 6]} /><meshStandardMaterial color="#1F4A32" /></mesh>
+            <mesh position={[-s * 0.6, 5.2, 0]}><boxGeometry args={[1.3, 0.12, 0.12]} /><meshStandardMaterial color="#1F4A32" /></mesh>
             <mesh position={[-s * 1.1, 5.05, 0]}><sphereGeometry args={[0.28, 10, 8]} /><meshBasicMaterial color="#ffe1a0" /></mesh>
           </group>
         )),
       )}
       {/* sun disc on the horizon */}
-      <mesh position={[0, 26, -300]}><circleGeometry args={[34, 40]} /><meshBasicMaterial color="#ffb36b" fog={false} /></mesh>
+      <mesh position={[0, 26, -300]}><circleGeometry args={[34, 40]} /><meshBasicMaterial color="#FFF1C9" fog={false} /></mesh>
     </group>
   );
 };
@@ -181,19 +182,19 @@ const Loot: React.FC<{z: number; t: number; hit: number; color: string}> = ({z, 
       {s > 0.01 && (
         <group position={[0, 0.9 + Math.sin(t * 3) * 0.15, 0]} rotation={[0, t * 1.6, 0]} scale={s}>
           <mesh><boxGeometry args={[1, 1, 1]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.35} /></mesh>
-          <mesh><boxGeometry args={[1.04, 1.04, 0.18]} /><meshStandardMaterial color="#ffd54a" emissive="#ffb300" emissiveIntensity={0.5} /></mesh>
-          <mesh><boxGeometry args={[0.18, 1.04, 1.04]} /><meshStandardMaterial color="#ffd54a" emissive="#ffb300" emissiveIntensity={0.5} /></mesh>
+          <mesh><boxGeometry args={[1.04, 1.04, 0.18]} /><meshStandardMaterial color="#E0A526" emissive="#B9821A" emissiveIntensity={0.3} /></mesh>
+          <mesh><boxGeometry args={[0.18, 1.04, 1.04]} /><meshStandardMaterial color="#E0A526" emissive="#B9821A" emissiveIntensity={0.3} /></mesh>
         </group>
       )}
-      <mesh position={[0, 6, 0]}><cylinderGeometry args={[0.7, 0.9, 12, 16, 1, true]} /><meshBasicMaterial color="#fff27a" transparent opacity={0.22 * (1 - k)} side={THREE.DoubleSide} depthWrite={false} /></mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}><ringGeometry args={[0.9, 1.25, 32]} /><meshBasicMaterial color="#fff27a" transparent opacity={0.8 * (1 - k)} /></mesh>
+      <mesh position={[0, 6, 0]}><cylinderGeometry args={[0.7, 0.9, 12, 16, 1, true]} /><meshBasicMaterial color="#E0A526" transparent opacity={0.22 * (1 - k)} side={THREE.DoubleSide} depthWrite={false} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}><ringGeometry args={[0.9, 1.25, 32]} /><meshBasicMaterial color="#E0A526" transparent opacity={0.8 * (1 - k)} /></mesh>
       {burst >= 0 &&
         [...Array(24)].map((_, i) => {
           const a = (i / 24) * Math.PI * 2, r = 0.5 + burst * 4;
           return (
             <mesh key={i} position={[Math.cos(a) * r, 1 + Math.sin(i * 1.7) * burst * 2 + burst * 2, Math.sin(a) * r]}>
               <boxGeometry args={[0.18, 0.18, 0.18]} />
-              <meshBasicMaterial color={i % 2 ? '#ffd54a' : '#7cf27c'} transparent opacity={1 - burst} />
+              <meshBasicMaterial color={i % 2 ? '#E0A526' : '#1F4A32'} transparent opacity={1 - burst} />
             </mesh>
           );
         })}
@@ -208,7 +209,7 @@ const Fireworks: React.FC<{t: number; t0: number; z: number}> = ({t, t0, z}) => 
       {[0, 0.5, 1.0, 1.4].map((d, j) => {
         const k = t - t0 - d;
         if (k < 0 || k > 1.4) return null;
-        const c = ['#ffd54a', '#7cf27c', '#ff5d8f', '#6ec8ff'][j];
+        const c = ['#E0A526', '#1F4A32', '#A9C3AE', '#ffffff'][j];
         const cx = [-6, 5, -2, 7][j], cy = 16 + j * 2;
         return [...Array(28)].map((_, i) => {
           const a = (i / 28) * Math.PI * 2, r = k * 6;
@@ -238,27 +239,27 @@ const Rig: React.FC<{pos: [number, number, number]; look: [number, number, numbe
 
 // ---------- HUD ----------
 const Radar: React.FC<{t: number; heading: number; targets: number[]}> = ({t, targets}) => (
-  <div style={{position: 'absolute', left: 70, top: 1470, width: 230, height: 230, borderRadius: 999, background: 'rgba(16,32,24,0.82)', border: '6px solid #0b0b0b', overflow: 'hidden', zIndex: 60}}>
+  <div style={{position: 'absolute', left: 70, top: 1470, width: 230, height: 230, borderRadius: 999, background: 'rgba(31,74,50,0.88)', border: `6px solid ${L.cream}`, overflow: 'hidden', zIndex: 60}}>
     <svg width={230} height={230}>
-      <rect x={100} y={0} width={30} height={230} fill="#4b5a52" />
-      {[...Array(8)].map((_, i) => <rect key={i} x={i % 2 ? 140 : 40} y={((i * 40 - t * 30) % 320) - 40} width={50} height={30} fill="#33453b" />)}
-      {targets.map((dz, i) => (dz > -1 && dz < 12 ? <circle key={i} cx={115} cy={115 - dz * 9} r={9} fill="#ffd54a" stroke="#000" strokeWidth={2} /> : null))}
-      <polygon points="115,100 127,128 115,120 103,128" fill="#fff" stroke="#000" strokeWidth={2} />
+      <rect x={100} y={0} width={30} height={230} fill="#A9C3AE" />
+      {[...Array(8)].map((_, i) => <rect key={i} x={i % 2 ? 140 : 40} y={((i * 40 - t * 30) % 320) - 40} width={50} height={30} fill="#2d5c43" />)}
+      {targets.map((dz, i) => (dz > -1 && dz < 12 ? <circle key={i} cx={115} cy={115 - dz * 9} r={9} fill="#E0A526" stroke="#143523" strokeWidth={2} /> : null))}
+      <polygon points="115,100 127,128 115,120 103,128" fill="#ffffff" stroke="#143523" strokeWidth={2} />
     </svg>
   </div>
 );
 const Bars: React.FC<{hp: number}> = ({hp}) => (
   <div style={{position: 'absolute', left: 70, top: 1710, width: 230, zIndex: 60}}>
-    <div style={{height: 14, background: '#0b0b0b', padding: 2}}><div style={{height: '100%', width: `${hp * 100}%`, background: '#58c94f'}} /></div>
-    <div style={{height: 10, background: '#0b0b0b', padding: 2, marginTop: 4}}><div style={{height: '100%', width: '82%', background: '#4fa3e0'}} /></div>
+    <div style={{height: 14, background: L.forestDeep, padding: 2}}><div style={{height: '100%', width: `${hp * 100}%`, background: L.mustard}} /></div>
+    <div style={{height: 10, background: L.forestDeep, padding: 2, marginTop: 4}}><div style={{height: '100%', width: '82%', background: L.sageDeep}} /></div>
   </div>
 );
 const Money: React.FC<{value: number; stars: number; t: number}> = ({value, stars, t}) => (
   <div style={{position: 'absolute', right: 150, top: 280, textAlign: 'right', zIndex: 60}}>
-    <div style={{fontFamily: 'Bebas Neue', fontSize: 96, color: '#7CF27C', letterSpacing: 2, ...OUT('#06200a', 9)}}>LOOT {value}/3</div>
+    <div style={{fontFamily: 'Bebas Neue', fontSize: 96, color: L.forest, letterSpacing: 2, ...OUT(L.cream, 9)}}>LOOT {value}/3</div>
     <div style={{display: 'flex', gap: 6, justifyContent: 'flex-end'}}>
       {[...Array(5)].map((_, i) => (
-        <svg key={i} width={50} height={50} viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.6 4.3L18.5 21 12 16.7 5.5 21l2.1-7.7L2 9h7z" fill={i < stars ? (i === stars - 1 && Math.floor(t * 6) % 2 ? '#fff' : '#f7e463') : 'rgba(0,0,0,0.35)'} stroke="#111" strokeWidth={1.6} /></svg>
+        <svg key={i} width={50} height={50} viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.6 4.3L18.5 21 12 16.7 5.5 21l2.1-7.7L2 9h7z" fill={i < stars ? (i === stars - 1 && Math.floor(t * 6) % 2 ? '#fff' : L.mustard) : 'rgba(31,74,50,0.25)'} stroke={L.forestDeep} strokeWidth={1.6} /></svg>
       ))}
     </div>
   </div>
@@ -308,14 +309,14 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   const sp = (at: number) => (t < at ? 0 : spring({frame: frame - Math.round(at * fps), fps, config: {damping: 11, stiffness: 200, mass: 0.7}}));
 
   return (
-    <AbsoluteFill style={{background: '#1a0d2b'}}>
+    <AbsoluteFill style={{background: L.bg}}>
       {t < end && human && (
         <ThreeCanvas width={width} height={height} linear flat={false}>
-          <color attach="background" args={['#6a3a8c']} />
-          <fog attach="fog" args={['#8a4f8f', 30, 190]} />
-          <hemisphereLight args={['#ffc6d6', '#5a4680', 1.5]} />
-          <directionalLight position={[-20, 30, -60]} intensity={1.4} color="#ffc38a" />
-          <ambientLight intensity={0.5} />
+          <color attach="background" args={['#E6EFE3']} />
+          <fog attach="fog" args={['#EEF1E6', 45, 230]} />
+          <hemisphereLight args={['#ffffff', '#c9d6c6', 2.2]} />
+          <directionalLight position={[-20, 40, 20]} intensity={2.4} color="#fff4e0" />
+          <ambientLight intensity={0.7} />
           <Rig pos={pos} look={cam.look} fov={cam.fov} />
           <pointLight position={[1.8, 3.6, pz + 2.6]} intensity={45} distance={14} color="#ffe2c4" />
           <pointLight position={[-2.2, 3.0, pz - 2.8]} intensity={30} distance={12} color="#9ad0ff" />
@@ -327,7 +328,7 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
         </ThreeCanvas>
       )}
       {/* sky glow + grade */}
-      <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(255,140,90,0.18), transparent 35%, transparent 70%, rgba(20,8,35,0.55))', pointerEvents: 'none'}} />
+      <AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(255,255,255,0.18), transparent 35%, transparent 75%, rgba(31,74,50,0.22))', pointerEvents: 'none'}} />
       <AbsoluteFill style={{background: `rgba(255,255,255,${flash})`}} />
       {t < end && (
         <>
@@ -339,15 +340,15 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
       {/* mission title */}
       {t < objT && (
         <>
-          <AbsoluteFill style={{background: `linear-gradient(transparent 30%, rgba(0,0,0,${0.35 * titleIn}) 50%, transparent 70%)`}} />
-          <div style={{position: 'absolute', top: 640, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, fontSize: 46, letterSpacing: 10, color: '#fff', ...OUT('#000', 6), opacity: 1}}>NEW MISSION UNLOCKED</div>
-          <div style={{position: 'absolute', top: 720, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontStyle: 'italic', fontSize: 150, lineHeight: 0.95, color: '#fbe7a1', ...OUT('#000', 14), transform: `scale(${2.2 - 1.2 * sp(T(d, ['hook', 'cyber']))}) rotate(-3deg)`, opacity: Math.min(1, sp(T(d, ['hook', 'cyber'])) * 3)}}>THE CYBER<br />WEEK HEIST</div>
+          <AbsoluteFill style={{background: `linear-gradient(transparent 30%, rgba(244,239,231,${0.6 * titleIn}) 50%, transparent 70%)`}} />
+          <div style={{position: 'absolute', top: 640, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, fontSize: 46, letterSpacing: 10, color: L.forest, ...OUT(L.cream, 6), opacity: 1}}>NEW MISSION UNLOCKED</div>
+          <div style={{position: 'absolute', top: 720, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontStyle: 'italic', fontSize: 150, lineHeight: 0.95, color: L.mustard, ...OUT(L.forestDeep, 14), transform: `scale(${2.2 - 1.2 * sp(T(d, ['hook', 'cyber']))}) rotate(-3deg)`, opacity: Math.min(1, sp(T(d, ['hook', 'cyber'])) * 3)}}>THE CYBER<br />WEEK HEIST</div>
         </>
       )}
       {/* objective */}
       {t >= objT && t < T(d, [items[0].line]) && (
-        <div style={{position: 'absolute', left: 90, top: 470, width: 900, background: 'rgba(0,0,0,0.78)', borderRadius: 8, padding: '24px 32px', fontFamily: FONT.body, fontWeight: 700, fontSize: 54, color: '#fff', lineHeight: 1.2, zIndex: 58, transform: `translateY(${(1 - sp(objT)) * -200}px)`}}>
-          Objective: fix <span style={{color: '#f7e463'}}>holiday chaos</span> before the deals are <span style={{color: '#ff6b6b'}}>gone</span>.
+        <div style={{position: 'absolute', left: 90, top: 470, width: 900, background: 'rgba(31,74,50,0.92)', borderRadius: 14, padding: '24px 32px', fontFamily: FONT.body, fontWeight: 700, fontSize: 54, color: L.cream, lineHeight: 1.2, zIndex: 58, transform: `translateY(${(1 - sp(objT)) * -200}px)`}}>
+          Objective: fix <span style={{color: L.mustard}}>holiday chaos</span> before the deals are <span style={{color: L.mustard}}>gone</span>.
         </div>
       )}
       {/* per item: problem alert, then ITEM ACQUIRED card */}
@@ -361,27 +362,27 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
         return (
           <React.Fragment key={i}>
             {t < p + 0.2 && (
-              <div style={{position: 'absolute', left: 540, top: 820, transform: `translateX(-50%) scale(${2 - sp(a)}) rotate(-2deg)`, opacity: Math.min(1, sp(a) * 3), zIndex: 62, background: '#c62828', color: '#fff', fontFamily: 'Bebas Neue', fontSize: 92, letterSpacing: 3, padding: '6px 34px 2px', border: '7px solid #000', whiteSpace: 'nowrap'}}>
+              <div style={{position: 'absolute', left: 540, top: 820, transform: `translateX(-50%) scale(${2 - sp(a)}) rotate(-2deg)`, opacity: Math.min(1, sp(a) * 3), zIndex: 62, background: L.mustard, color: L.forestDeep, fontFamily: 'Bebas Neue', fontSize: 92, letterSpacing: 3, padding: '6px 34px 2px', border: `7px solid ${L.forestDeep}`, whiteSpace: 'nowrap'}}>
                 ⚠ {it.problem.toUpperCase()}
               </div>
             )}
             {t >= p && (
-              <div style={{position: 'absolute', left: 80, top: 430, width: 920, zIndex: 63, transform: `translateX(${(1 - cardK) * -1100}px) rotate(-1.5deg)`, background: 'rgba(8,8,12,0.88)', border: '6px solid #f7e463', borderRadius: 10, padding: '20px 28px 26px', boxShadow: '12px 12px 0 rgba(0,0,0,0.5)'}}>
-                <div style={{fontFamily: 'Bebas Neue', fontSize: 50, letterSpacing: 6, color: '#f7e463'}}>ITEM ACQUIRED</div>
+              <div style={{position: 'absolute', left: 80, top: 430, width: 920, zIndex: 63, transform: `translateX(${(1 - cardK) * -1100}px) rotate(-1.5deg)`, background: 'rgba(244,239,231,0.97)', border: `6px solid ${L.forest}`, borderRadius: 16, padding: '20px 28px 26px', boxShadow: `12px 12px 0 ${L.mustard}`}}>
+                <div style={{fontFamily: 'Bebas Neue', fontSize: 50, letterSpacing: 6, color: L.mustardDeep}}>ITEM ACQUIRED</div>
                 <div style={{display: 'flex', alignItems: 'center', gap: 24}}>
-                  <div style={{width: 300, height: 330, display: 'flex', alignItems: 'center', justifyContent: 'center', background: it.color, border: '5px solid #000', transform: `scale(${0.6 + 0.4 * sp(p + 0.08)}) rotate(${(1 - sp(p + 0.08)) * -20}deg)`}}>
-                    <Img src={staticFile(it.src)} style={{maxHeight: 300, maxWidth: 280, objectFit: 'contain', filter: 'drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff)'}} />
+                  <div style={{width: 300, height: 330, display: 'flex', alignItems: 'center', justifyContent: 'center', background: it.color, border: `5px solid ${L.forest}`, borderRadius: 12, transform: `scale(${0.6 + 0.4 * sp(p + 0.08)}) rotate(${(1 - sp(p + 0.08)) * -20}deg)`}}>
+                    <Img src={staticFile(it.src)} style={{maxHeight: 300, maxWidth: 280, objectFit: 'contain', filter: 'drop-shadow(0 10px 12px rgba(31,74,50,0.35))'}} />
                   </div>
                   <div style={{flex: 1, minWidth: 0}}>
-                    <div style={{fontFamily: 'Bebas Neue', fontSize: 72, lineHeight: 0.95, color: '#fff', overflowWrap: 'anywhere'}}>{it.name.toUpperCase()}</div>
-                    <div style={{fontFamily: FONT.body, fontWeight: 700, fontSize: 34, color: '#d7d7e0', marginTop: 8, lineHeight: 1.2}}>{it.benefit}</div>
-                    {t >= sAt && <div style={{marginTop: 14, display: 'inline-block', background: '#7CF27C', color: '#06200a', fontFamily: FONT.display, fontSize: 44, padding: '6px 18px', border: '5px solid #000', whiteSpace: 'nowrap', transform: `scale(${2 - sp(sAt)})`}}>SAVE UP TO ${it.save}</div>}
+                    <div style={{fontFamily: 'Bebas Neue', fontSize: 72, lineHeight: 0.95, color: L.forest, overflowWrap: 'anywhere'}}>{it.name.toUpperCase()}</div>
+                    <div style={{fontFamily: FONT.body, fontWeight: 700, fontSize: 34, color: L.ink, marginTop: 8, lineHeight: 1.2}}>{it.benefit}</div>
+                    {t >= sAt && <div style={{marginTop: 14, display: 'inline-block', background: L.forest, color: L.cream, fontFamily: FONT.display, fontSize: 44, padding: '6px 18px', borderRadius: 10, whiteSpace: 'nowrap', transform: `scale(${2 - sp(sAt)})`}}>SAVE UP TO ${it.save}</div>}
                   </div>
                 </div>
               </div>
             )}
             {dk < 18 && lastPick === p && (
-              <div style={{position: 'absolute', right: 150, top: 400, zIndex: 64, fontFamily: 'Bebas Neue', fontSize: 110, color: '#7CF27C', ...OUT('#06200a', 9), transform: `translateY(${-dk * 4}px)`, opacity: 1 - dk / 18}}>+1 LOOT</div>
+              <div style={{position: 'absolute', right: 150, top: 400, zIndex: 64, fontFamily: 'Bebas Neue', fontSize: 110, color: L.forest, ...OUT(L.cream, 9), transform: `translateY(${-dk * 4}px)`, opacity: 1 - dk / 18}}>+1 LOOT</div>
             )}
           </React.Fragment>
         );
@@ -389,27 +390,28 @@ export const GameReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
       {/* mission passed */}
       {t >= passT && t < end && (
         <>
-          <div style={{position: 'absolute', top: 470, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontSize: 112, color: '#fff', ...OUT('#000', 12), transform: `scale(${2 - sp(passT)})`, zIndex: 65}}>UP TO 50% OFF</div>
-          {t >= T(d, ['pass', 'mission']) && <div style={{position: 'absolute', top: 640, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontStyle: 'italic', fontSize: 150, lineHeight: 0.95, color: '#f7c948', ...OUT('#000', 14), transform: `scale(${2.4 - 1.4 * sp(T(d, ['pass', 'mission']))})`, zIndex: 65}}>MISSION<br />PASSED</div>}
+          <div style={{position: 'absolute', top: 470, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontSize: 112, color: L.forest, ...OUT(L.cream, 12), transform: `scale(${2 - sp(passT)})`, zIndex: 65}}>UP TO 50% OFF</div>
+          {t >= T(d, ['pass', 'mission']) && <div style={{position: 'absolute', top: 640, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontStyle: 'italic', fontSize: 150, lineHeight: 0.95, color: L.mustard, ...OUT(L.forestDeep, 14), transform: `scale(${2.4 - 1.4 * sp(T(d, ['pass', 'mission']))})`, zIndex: 65}}>MISSION<br />PASSED</div>}
         </>
       )}
       {/* end card: pause-menu style */}
       {t >= end && (
-        <AbsoluteFill style={{background: 'linear-gradient(160deg, #2b1055, #120720)'}}>
-          <div style={{position: 'absolute', top: 290, width: '100%', textAlign: 'center'}}><Img src={staticFile(BRAND.logoWhite as string)} style={{height: 110, transform: `scale(${sp(end)})`}} /></div>
-          <div style={{position: 'absolute', top: 450, left: 120, width: 840, fontFamily: 'Bebas Neue', fontSize: 64, letterSpacing: 6, color: '#f7e463'}}>MISSION REWARDS</div>
+        <AbsoluteFill>
+          <BrandBG flip />
+          <div style={{position: 'absolute', top: 290, width: '100%', textAlign: 'center'}}><Img src={staticFile(BRAND.logo as string)} style={{height: 110, transform: `scale(${sp(end)})`}} /></div>
+          <div style={{position: 'absolute', top: 450, left: 120, width: 840, fontFamily: 'Bebas Neue', fontSize: 64, letterSpacing: 6, color: L.forest}}>MISSION REWARDS</div>
           {items.map((it, i) => (
-            <div key={i} style={{position: 'absolute', top: 540 + i * 150, left: 120, width: 840, height: 130, display: 'flex', alignItems: 'center', gap: 24, background: 'rgba(255,255,255,0.08)', border: '4px solid rgba(255,255,255,0.25)', transform: `translateX(${(1 - sp(end + 0.1 + i * 0.12)) * 900}px)`}}>
+            <div key={i} style={{position: 'absolute', top: 540 + i * 150, left: 120, width: 840, height: 130, display: 'flex', alignItems: 'center', gap: 24, background: L.white, border: `4px solid ${L.sageDeep}`, borderRadius: 16, transform: `translateX(${(1 - sp(end + 0.1 + i * 0.12)) * 900}px)`}}>
               <div style={{width: 120, height: 120, background: it.color, display: 'flex', alignItems: 'center', justifyContent: 'center'}}><Img src={staticFile(it.src)} style={{maxHeight: 110, maxWidth: 110, objectFit: 'contain'}} /></div>
-              <div style={{flex: 1, fontFamily: 'Bebas Neue', fontSize: 62, color: '#fff'}}>{it.label.toUpperCase()}</div>
-              <div style={{fontFamily: 'Bebas Neue', fontSize: 62, color: '#7CF27C', paddingRight: 24}}>UP TO ${it.save}</div>
+              <div style={{flex: 1, fontFamily: 'Bebas Neue', fontSize: 62, color: L.forest}}>{it.label.toUpperCase()}</div>
+              <div style={{fontFamily: 'Bebas Neue', fontSize: 62, color: L.mustardDeep, paddingRight: 24}}>UP TO ${it.save}</div>
             </div>
           ))}
-          <div style={{position: 'absolute', top: 1030, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontSize: 84, color: '#fff', ...OUT('#000', 8), opacity: sp(end + 0.4)}}>UP TO 50% OFF</div>
-          <div style={{position: 'absolute', top: 1140, left: 540, transform: `translateX(-50%) scale(${sp(end + 0.55) * (1 - 0.06 * Math.max(0, Math.sin((t - end - 1) * 7)))})`, background: '#7CF27C', color: '#06200a', fontFamily: FONT.display, fontSize: 56, padding: '18px 48px', border: '6px solid #000', whiteSpace: 'nowrap'}}>▶ CONTINUE TO {BRAND.domain.toUpperCase()}</div>
+          <div style={{position: 'absolute', top: 1030, width: '100%', textAlign: 'center', fontFamily: 'Bowlby One', fontSize: 84, color: L.forest, opacity: sp(end + 0.4)}}>UP TO 50% OFF</div>
+          <div style={{position: 'absolute', top: 1140, left: 540, transform: `translateX(-50%) scale(${sp(end + 0.55) * (1 - 0.06 * Math.max(0, Math.sin((t - end - 1) * 7)))})`, background: L.forest, color: L.cream, fontFamily: FONT.display, fontSize: 56, padding: '18px 48px', borderRadius: 999, whiteSpace: 'nowrap'}}>▶ CONTINUE TO {BRAND.domain.toUpperCase()}</div>
         </AbsoluteFill>
       )}
-      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 52, weight: 800, color: '#ffffff', active: '#f7e463', bg: null, y: 1236, shadow: '0 0 6px #000, 0 0 2px #000, 3px 3px 0 #000'}} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 52, weight: 800, ...LIGHT_CAPTIONS, y: 1236}} />
     </AbsoluteFill>
   );
 };

@@ -11,6 +11,7 @@ import {Captions, CaptionStyle} from '../components/Captions';
 import {VideoData, wt as wtw} from '../components/timeline';
 import {N, FONT, BRAND} from '../theme';
 import {GameReel} from './Game3D';
+import {BrandBG, BgVariant, L, LIGHT_CAPTIONS} from './BrandBG';
 const LOGO = {white: BRAND.logoWhite as string, full: BRAND.logo as string};
 
 const FPS = 30;
@@ -133,6 +134,7 @@ const TapButton: React.FC<{at: number; text: string; bg: string; color: string; 
 };
 
 type EndTheme = {bg: string; fg: string; accent: string; card?: string; font?: string; btnBg: string; btnFg: string; logo: 'white' | 'full'; bgNode?: React.ReactNode; radius?: number; border?: string};
+const LIGHT_END: EndTheme = {bg: L.bg, fg: L.ink, accent: L.forest, btnBg: L.forest, btnFg: L.cream, logo: 'full', bgNode: <BrandBG flip />};
 const EndCard: React.FC<{at: number; theme: EndTheme; kicker: string; big: string; sub: string; note?: string; products: string[]; button?: string}> = ({at, theme, kicker, big, sub, note, products, button}) => {
   const frame = useCurrentFrame();
   const t = frame / FPS;
@@ -156,6 +158,29 @@ const EndCard: React.FC<{at: number; theme: EndTheme; kicker: string; big: strin
   );
 };
 
+// ---------- stock / Flow hook clip ----------
+/** A real-footage hook beat: full-bleed clip with a cream wash at the top so brand-green type stays readable. */
+const HookClip: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
+  const h = spec.hookClip;
+  const frame = useCurrentFrame();
+  if (!h) return null;
+  const a = T(d, h.from ?? 0), b = T(d, h.to);
+  if (frame < fr(a) || frame >= fr(b)) return null;
+  const k = (frame - fr(a)) / Math.max(1, fr(b) - fr(a));
+  const inK = Math.min(1, (frame - fr(a)) / 5);
+  return (
+    <AbsoluteFill style={{zIndex: 5}}>
+      <Sequence from={fr(a)} durationInFrames={Math.max(1, fr(b) - fr(a))}>
+        <AbsoluteFill style={{overflow: 'hidden'}}>
+          <OffthreadVideo src={src(h.src)} muted startFrom={fr(h.start ?? 0)} style={{width: 1080, height: 1920, objectFit: 'cover', objectPosition: h.pos ?? '50% 50%', filter: h.blur ? `blur(${h.blur}px)` : undefined, transform: `scale(${(h.zoom ?? 1.05) + k * 0.08 + (1 - inK) * 0.15})`}} />
+        </AbsoluteFill>
+      </Sequence>
+      <AbsoluteFill style={{background: `linear-gradient(180deg, rgba(244,239,231,${h.wash ?? 0.82}) 0%, rgba(244,239,231,${(h.wash ?? 0.82) * 0.7}) 42%, rgba(244,239,231,0) 62%, rgba(20,53,35,0.25) 100%)`}} />
+      <AbsoluteFill style={{border: `14px solid ${L.forest}`, boxSizing: 'border-box'}} />
+    </AbsoluteFill>
+  );
+};
+
 // ---------- 1. GLITCH ----------
 const GlitchText: React.FC<{text: string; at: number; size: number; y: number; color: string; font?: string; burst?: number; x?: number}> = ({text, at, size, y, color, font = FONT.display, burst = 0.35, x = 540}) => {
   const frame = useCurrentFrame();
@@ -168,8 +193,8 @@ const GlitchText: React.FC<{text: string; at: number; size: number; y: number; c
   const base: React.CSSProperties = {position: 'absolute', left: 0, top: 0, width: '100%', textAlign: 'center', fontFamily: font, fontSize: size, lineHeight: 1, whiteSpace: 'pre', letterSpacing: -2};
   return (
     <div style={{position: 'absolute', left: x - 540, top: y, width: 1080, height: size * 1.1 * (text.split('\n').length), transform: `scale(${0.7 + 0.3 * s})`, zIndex: 30}}>
-      <div style={{...base, color: '#ff2a6d', transform: `translate(${j('r') - 6 * k}px, ${j('r2') / 3}px)`, opacity: 0.85, mixBlendMode: 'screen'}}>{text}</div>
-      <div style={{...base, color: '#05d9e8', transform: `translate(${j('c') + 6 * k}px, ${j('c2') / 3}px)`, opacity: 0.85, mixBlendMode: 'screen'}}>{text}</div>
+      <div style={{...base, color: L.mustard, transform: `translate(${j('r') - 6 * k}px, ${j('r2') / 3}px)`, opacity: 0.9, mixBlendMode: 'multiply'}}>{text}</div>
+      <div style={{...base, color: L.sageDeep, transform: `translate(${j('c') + 6 * k}px, ${j('c2') / 3}px)`, opacity: 0.9, mixBlendMode: 'multiply'}}>{text}</div>
       <div style={{...base, color}}>{text}</div>
       {slices.map((sl, i) => (
         <div key={i} style={{...base, color, clipPath: `inset(${sl.top}% 0 ${Math.max(0, 100 - sl.top - sl.h)}% 0)`, transform: `translateX(${sl.dx}px)`}}>{text}</div>
@@ -194,12 +219,12 @@ const Kinetic: React.FC<{text: string; at: number; y: number; size: number; colo
 
 const GlitchBG: React.FC = () => {
   const frame = useCurrentFrame();
-  const flick = random(`f${Math.floor(frame / 2)}`) > 0.96 ? 0.07 : 0;
+  const flick = random(`f${Math.floor(frame / 2)}`) > 0.96 ? 0.05 : 0;
   return (
-    <AbsoluteFill style={{background: '#050b07'}}>
-      <AbsoluteFill style={{backgroundImage: `linear-gradient(rgba(46,204,113,0.13) 2px, transparent 2px), linear-gradient(90deg, rgba(46,204,113,0.13) 2px, transparent 2px)`, backgroundSize: '90px 90px', backgroundPosition: `0 ${(frame * 3) % 90}px`, transform: 'perspective(700px) rotateX(55deg) translateY(380px) scale(2.2)', transformOrigin: '50% 100%'}} />
-      <AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 40%, rgba(224,165,38,0.18), transparent 60%)'}} />
-      <AbsoluteFill style={{background: `rgba(255,255,255,${flick})`}} />
+    <AbsoluteFill>
+      <BrandBG />
+      <AbsoluteFill style={{backgroundImage: `linear-gradient(rgba(31,74,50,0.07) 2px, transparent 2px), linear-gradient(90deg, rgba(31,74,50,0.07) 2px, transparent 2px)`, backgroundSize: '90px 90px', backgroundPosition: `0 ${(frame * 3) % 90}px`, transform: 'perspective(700px) rotateX(55deg) translateY(380px) scale(2.2)', transformOrigin: '50% 100%'}} />
+      <AbsoluteFill style={{background: `rgba(31,74,50,${flick})`}} />
     </AbsoluteFill>
   );
 };
@@ -218,27 +243,28 @@ const GlitchReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   const end = d.endCardStart;
   const items = spec.items as {line: string; label: string; problem?: string; src: string; save: number; h?: number}[];
   const hk = spec.hook;
-  const gold = N.mustard;
+  const gold = L.mustard;
   return (
     <AbsoluteFill>
       <GlitchBG />
+      <HookClip spec={spec} d={d} />
       {/* hook: WAIT! -> CYBER WEEK -> UP TO 50% OFF */}
       <Show from={0} to={T(d, hk.cyberAt)}>
-        <GlitchText text="WAIT!" at={0.0} size={300} y={620} color="#ffffff" burst={0.5} />
+        <GlitchText text="WAIT!" at={0.0} size={300} y={620} color={L.forest} burst={0.5} />
         {[...Array(6)].map((_, i) => {
           const it = items[i % items.length];
           const on = Math.floor(frame / 4) % items.length === i;
-          return on ? <Img key={i} src={src(it.src)} style={{position: 'absolute', left: 540, top: 330, height: 260, transform: 'translateX(-50%)', opacity: 0.35, filter: 'grayscale(1) contrast(1.4)'}} /> : null;
+          return on ? <Img key={i} src={src(it.src)} style={{position: 'absolute', left: 540, top: 330, height: 260, transform: 'translateX(-50%)', opacity: 0.35, filter: 'grayscale(1) contrast(1.1)'}} /> : null;
         })}
       </Show>
       <Show from={T(d, hk.cyberAt)} to={T(d, hk.upAt)}>
-        <Kinetic text="CYBER WEEK" at={T(d, hk.cyberAt)} y={560} size={210} color="#ffffff" />
-        <Kinetic text="JUST DROPPED" at={T(d, hk.cyberAt) + 0.35} y={800} size={110} color={gold} />
+        <Kinetic text="CYBER WEEK" at={T(d, hk.cyberAt)} y={560} size={210} color={L.forest} />
+        <Kinetic text="JUST DROPPED" at={T(d, hk.cyberAt) + 0.35} y={800} size={110} color={L.mustardDeep} />
       </Show>
       <Show from={T(d, hk.upAt)} to={T(d, [items[0].line])}>
-        <GlitchText text="UP TO" at={T(d, hk.upAt)} size={130} y={420} color="#ffffff" />
-        <GlitchText text="50%" at={T(d, hk.upAt) + 0.15} size={380} y={560} color={gold} burst={0.6} />
-        <GlitchText text="OFF" at={T(d, hk.upAt) + 0.3} size={200} y={950} color="#ffffff" />
+        <GlitchText text="UP TO" at={T(d, hk.upAt)} size={130} y={420} color={L.forest} />
+        <GlitchText text="50%" at={T(d, hk.upAt) + 0.15} size={380} y={560} color={L.forest} burst={0.6} />
+        <GlitchText text="OFF" at={T(d, hk.upAt) + 0.3} size={200} y={950} color={L.forest} />
       </Show>
       {/* category list */}
       {items.map((it, i) => {
@@ -251,15 +277,15 @@ const GlitchReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
               const sol = it.problem ? T(d, [it.line, it.label.toLowerCase().slice(0, 3)]) : a;
               return (
                 <>
-                  {it.problem && t < sol && <GlitchText text={it.problem.toUpperCase().replace(' ', '\n')} at={a} size={Math.min(170, Math.floor(1250 / Math.max(...it.problem.split(' ').map((w) => w.length))))} y={560} color="#ff4d6d" burst={0.3} />}
-                  {t >= sol && <Kinetic text={it.label.toUpperCase()} at={sol} y={410} size={Math.min(130, Math.floor(1750 / it.label.length))} color="#ffffff" stagger={0.025} />}
+                  {it.problem && t < sol && <GlitchText text={it.problem.toUpperCase().replace(' ', '\n')} at={a} size={Math.min(170, Math.floor(1250 / Math.max(...it.problem.split(' ').map((w) => w.length))))} y={560} color={L.mustardDeep} burst={0.3} />}
+                  {t >= sol && <Kinetic text={it.label.toUpperCase()} at={sol} y={410} size={Math.min(130, Math.floor(1750 / it.label.length))} color={L.forest} stagger={0.025} />}
                   {t >= sol && <Punch at={sol} to={1.1}><GlitchProd p={it.src} at={sol + 0.03} h={it.h ?? 560} /></Punch>}
                 </>
               );
             })()}
             <div style={{position: 'absolute', top: 1085, width: '100%', textAlign: 'center', zIndex: 33}}>
               {t >= sAt && (
-                <div style={{display: 'inline-flex', alignItems: 'center', gap: 18, transform: `scale(${slam(frame, sAt, 1.6 + i * 0.15).s}) rotate(${-2 - i}deg)`, opacity: slam(frame, sAt).o, background: gold, color: '#050b07', fontFamily: FONT.display, fontSize: 84, padding: '6px 34px 10px', boxShadow: '8px 8px 0 #ff2a6d'}}>
+                <div style={{display: 'inline-flex', alignItems: 'center', gap: 18, transform: `scale(${slam(frame, sAt, 1.6 + i * 0.15).s}) rotate(${-2 - i}deg)`, opacity: slam(frame, sAt).o, background: L.forest, color: L.cream, fontFamily: FONT.display, fontSize: 84, padding: '6px 34px 10px', borderRadius: 14, boxShadow: `8px 8px 0 ${L.mustard}`}}>
                   SAVE UP TO <Odo value={it.save} at={sAt} h={96} />
                 </div>
               )}
@@ -267,10 +293,9 @@ const GlitchReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
           </Show>
         );
       })}
-      <Scan />
-      <Grain amount={0.08} />
-      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 50, weight: 800, color: '#ffffff', active: gold, bg: 'rgba(5,11,7,0.85)', y: 1236, radius: 6}} />
-      <EndCard at={end} theme={{bg: '#050b07', fg: '#ffffff', accent: gold, btnBg: gold, btnFg: '#050b07', logo: 'white', bgNode: <GlitchBG />}} kicker="Cyber Week only · up to" big="50% OFF" sub="Shop the deals" products={spec.endProducts} />
+      <Grain amount={0.05} vignette={0.08} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 50, weight: 800, ...LIGHT_CAPTIONS, y: 1236}} />
+      <EndCard at={end} theme={LIGHT_END} kicker="Cyber Week only · up to" big="50% OFF" sub="Shop the deals" products={spec.endProducts} />
     </AbsoluteFill>
   );
 };
@@ -283,9 +308,9 @@ const GlitchProd: React.FC<{p: string; at: number; h: number}> = ({p, at, h}) =>
   const style = (dx: number, f: string, op = 1): React.CSSProperties => ({position: 'absolute', left: 540 + dx, top: 530, height: h, maxWidth: 820, objectFit: 'contain', transform: `translateX(-50%) scale(${0.8 + 0.2 * s})`, filter: f, opacity: op, zIndex: 25});
   return (
     <>
-      {k > 0 && <Img src={src(p)} style={style(-28 * k, 'drop-shadow(0 0 0 #ff2a6d) hue-rotate(-60deg) saturate(3)', 0.6 * k)} />}
-      {k > 0 && <Img src={src(p)} style={style(28 * k, 'hue-rotate(150deg) saturate(3)', 0.6 * k)} />}
-      <Img src={src(p)} style={{...style(0, 'drop-shadow(0 0 40px rgba(46,204,113,0.45))'), clipPath: k > 0 ? `inset(0 0 ${Math.round(random(`k${frame}`) * 30 * k)}% 0)` : undefined}} />
+      {k > 0 && <Img src={src(p)} style={style(-28 * k, 'sepia(1) saturate(4) hue-rotate(-10deg)', 0.5 * k)} />}
+      {k > 0 && <Img src={src(p)} style={style(28 * k, 'sepia(1) saturate(2) hue-rotate(70deg)', 0.5 * k)} />}
+      <Img src={src(p)} style={{...style(0, 'drop-shadow(0 0 2px rgba(31,74,50,0.45)) drop-shadow(0 30px 30px rgba(31,74,50,0.3))'), clipPath: k > 0 ? `inset(0 0 ${Math.round(random(`k${frame}`) * 30 * k)}% 0)` : undefined}} />
     </>
   );
 };
@@ -370,9 +395,10 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   const end = d.endCardStart;
   const spots = spec.spots as {line: string; label: string; before?: string; after?: string; src: string; wipeAt: At; px: number; py: number; ph: number; chips: {text: string; at: At}[]}[];
   const offT = T(d, ['offer']);
-  const red = '#D7263D', green = N.forest;
+  const red = L.mustardDeep, green = L.forest;
   return (
-    <AbsoluteFill style={{background: N.cream}}>
+    <AbsoluteFill>
+      <BrandBG />
       {/* hook: 3 before tiles */}
       <Show from={0} to={T(d, [spots[0].line])}>
         {spots.map((s, i) => {
@@ -381,7 +407,7 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
           return (
             <div key={i} style={{position: 'absolute', left: 60 + i * 330, top: 520, width: 300, height: 520, borderRadius: 24, overflow: 'hidden', transform: `translateY(${(1 - k) * 600}px) rotate(${(i - 1) * 4}deg)`, boxShadow: '0 20px 40px rgba(0,0,0,0.25)', background: '#ddd'}}>
               {s.before ? <Img src={src(s.before)} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(0.7)'}} /> : null}
-              <div style={{position: 'absolute', bottom: 0, width: '100%', background: 'rgba(0,0,0,0.6)', color: '#fff', fontFamily: FONT.body, fontWeight: 800, fontSize: 34, textAlign: 'center', padding: 8}}>{s.label}</div>
+              <div style={{position: 'absolute', bottom: 0, width: '100%', background: L.forest, color: L.cream, fontFamily: FONT.body, fontWeight: 800, fontSize: 34, textAlign: 'center', padding: 8}}>{s.label}</div>
             </div>
           );
         })}
@@ -413,11 +439,12 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
         );
       })}
       {t >= offT && (
-        <AbsoluteFill style={{background: N.forest}}>
-          <div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, letterSpacing: 4, color: N.cream, fontSize: 46}}>CYBER WEEK · UP TO</div>
-          <div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: FONT.display, color: N.mustard, fontSize: 190, lineHeight: 1, transform: `scale(${sp(frame, offT)})`}}>50% OFF</div>
+        <AbsoluteFill>
+          <BrandBG />
+          <div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, letterSpacing: 4, color: L.ink, fontSize: 46}}>CYBER WEEK · UP TO</div>
+          <div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: FONT.display, color: L.forest, fontSize: 190, lineHeight: 1, transform: `scale(${sp(frame, offT)})`}}>50% OFF</div>
           {spec.saves.map((s: any, i: number) => (
-            <div key={i} style={{position: 'absolute', left: spec.saves.length === 1 ? 320 : i ? 560 : 80, top: 640, width: 440, height: 430, borderRadius: 30, background: N.cream, transform: `translateY(${(1 - sp(frame, offT + 0.5 + i * 0.2)) * 900}px) rotate(${i ? 2 : -2}deg)`, boxShadow: '0 20px 40px rgba(0,0,0,0.3)'}}>
+            <div key={i} style={{position: 'absolute', left: spec.saves.length === 1 ? 320 : i ? 560 : 80, top: 640, width: 440, height: 430, borderRadius: 30, background: L.white, transform: `translateY(${(1 - sp(frame, offT + 0.5 + i * 0.2)) * 900}px) rotate(${i ? 2 : -2}deg)`, boxShadow: '0 20px 40px rgba(0,0,0,0.3)'}}>
               <Img src={src(s.src)} style={{position: 'absolute', left: 220, top: 30, height: 230, transform: 'translateX(-50%)', objectFit: 'contain', maxWidth: 380}} />
               <div style={{position: 'absolute', top: 270, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, fontSize: 32, color: N.ink}}>{s.label}</div>
               {t >= T(d, s.at) - 0.1 ? <div style={{position: 'absolute', top: 315, width: '100%', display: 'flex', justifyContent: 'center', gap: 14, fontFamily: FONT.display, fontSize: 70, color: N.forest}}>UP TO <Odo value={s.save} at={T(d, s.at)} h={84} /></div> : <div style={{position: 'absolute', top: 315, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: 70, color: N.forest}}>UP TO 50%</div>}
@@ -425,9 +452,9 @@ const BAReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
           ))}
         </AbsoluteFill>
       )}
-      <Grain amount={0.06} vignette={0.25} />
-      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 50, weight: 800, color: N.ink, active: N.forest, bg: N.cream, y: 1236}} />
-      <EndCard at={end} theme={{bg: N.cream, fg: N.ink, accent: N.forest, btnBg: N.forest, btnFg: N.cream, logo: 'full'}} kicker="Cyber Week only · up to" big="50% OFF" sub="Storage & kitchen" products={spec.endProducts} />
+      <Grain amount={0.05} vignette={0.12} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 50, weight: 800, ...LIGHT_CAPTIONS, y: 1236}} />
+      <EndCard at={end} theme={LIGHT_END} kicker="Cyber Week only · up to" big="50% OFF" sub="Storage & kitchen" products={spec.endProducts} />
     </AbsoluteFill>
   );
 };
@@ -573,7 +600,7 @@ const Confetti: React.FC<{at: number}> = ({at}) => {
       {[...Array(60)].map((_, i) => {
         const a = random(`a${i}`) * Math.PI * 2, v = 500 + random(`v${i}`) * 900;
         const x = 540 + Math.cos(a) * v * tt, y = 760 + Math.sin(a) * v * tt + 900 * tt * tt;
-        return <div key={i} style={{position: 'absolute', left: x, top: y, width: 18, height: 30, background: ['#E2405B', N.mustard, N.forest, '#fff', '#5BC0EB'][i % 5], transform: `rotate(${tt * 720 + i * 20}deg)`, opacity: Math.max(0, 1 - tt / 1.6)}} />;
+        return <div key={i} style={{position: 'absolute', left: x, top: y, width: 18, height: 30, background: [L.forest, L.mustard, L.sageDeep, L.white, L.mustardDeep][i % 5], transform: `rotate(${tt * 720 + i * 20}deg)`, opacity: Math.max(0, 1 - tt / 1.6)}} />;
       })}
     </AbsoluteFill>
   );
@@ -585,33 +612,34 @@ const UgcReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   const revT = T(d, spec.revealAt), featT = T(d, ['feat']), offT = T(d, ['offer']);
   const c = spec.clips;
   return (
-    <AbsoluteFill style={{background: '#f4ece2'}}>
+    <AbsoluteFill style={{background: L.bg}}>
       <Clip p={c.hook} from={0} to={T(d, ['reveal'])} />
+      <HookClip spec={spec} d={d} />
       <Clip p={c.bow} from={T(d, ['reveal'])} to={revT} startFrom={c.bowStart ?? 0} />
       {/* reveal */}
       <Show from={revT} to={offT}>
-        <AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #fff6e8, #f3d9c4)'}} />
-        <AbsoluteFill style={{background: 'repeating-conic-gradient(from 0deg at 50% 45%, rgba(226,64,91,0.10) 0deg 8deg, transparent 8deg 16deg)', transform: `rotate(${t * 12}deg) scale(1.6)`}} />
+        <BrandBG />
+        <AbsoluteFill style={{background: 'repeating-conic-gradient(from 0deg at 50% 45%, rgba(31,74,50,0.05) 0deg 8deg, transparent 8deg 16deg)', transform: `rotate(${t * 12}deg) scale(1.6)`}} />
         <Punch at={revT} to={1.08}><Cut p={spec.product} x={540} y={430} h={720} at={revT} /></Punch>
         <Confetti at={revT} />
-        <Pill text="3-in-1" at={revT + 0.3} x={110} y={330} bg="#E2405B" color="#fff" size={60} rot={-6} />
-        {spec.chips.map((ch: any, i: number) => <Pill key={ch.text} text={ch.text} at={T(d, ch.at)} x={i % 2 ? 470 : 90} y={1010 + i * 96} bg="#fff" color={N.ink} size={44} rot={i % 2 ? 3 : -3} />)}
+        <Pill text="3-in-1" at={revT + 0.3} x={110} y={330} bg={L.forest} color={L.cream} size={60} rot={-6} />
+        {spec.chips.map((ch: any, i: number) => <Pill key={ch.text} text={ch.text} at={T(d, ch.at)} x={i % 2 ? 470 : 90} y={1010 + i * 96} bg={L.white} color={L.forest} size={44} rot={i % 2 ? 3 : -3} />)}
       </Show>
       <Clip p={c.react} from={offT} to={end} startFrom={c.reactStart ?? 0} />
       <Show from={offT} to={end}>
         <AbsoluteFill style={{background: 'linear-gradient(transparent 55%, rgba(0,0,0,0.5))'}} />
-        <div style={{position: 'absolute', left: 540, top: 330, transform: `translateX(-50%) scale(${sp(frame, offT)}) rotate(-4deg)`, background: '#E2405B', color: '#fff', fontFamily: FONT.display, fontSize: 96, padding: '10px 40px', borderRadius: 20, whiteSpace: 'nowrap', zIndex: 40}}>UP TO 50% OFF</div>
-        {t >= T(d, ['offer', '$']) && <div style={{position: 'absolute', left: 540, top: 490, transform: `translateX(-50%) scale(${slam(frame, T(d, ['offer', '$']), 1.7).s})`, background: '#fff', color: N.ink, fontFamily: FONT.display, fontSize: 52, padding: '10px 32px', borderRadius: 999, whiteSpace: 'nowrap', display: 'flex', gap: 12, alignItems: 'center', zIndex: 41}}>Save up to <Odo value={spec.save} at={T(d, ['offer', '$'])} h={62} /> on ride-ons</div>}
+        <div style={{position: 'absolute', left: 540, top: 330, transform: `translateX(-50%) scale(${sp(frame, offT)}) rotate(-4deg)`, background: L.forest, color: L.cream, fontFamily: FONT.display, fontSize: 96, padding: '10px 40px', borderRadius: 20, whiteSpace: 'nowrap', zIndex: 40}}>UP TO 50% OFF</div>
+        {t >= T(d, ['offer', '$']) && <div style={{position: 'absolute', left: 540, top: 490, transform: `translateX(-50%) scale(${slam(frame, T(d, ['offer', '$']), 1.7).s})`, background: L.mustard, color: L.forestDeep, fontFamily: FONT.display, fontSize: 52, padding: '10px 32px', borderRadius: 999, whiteSpace: 'nowrap', display: 'flex', gap: 12, alignItems: 'center', zIndex: 41}}>Save up to <Odo value={spec.save} at={T(d, ['offer', '$'])} h={62} /> on ride-ons</div>}
         <Img src={src(spec.product)} style={{position: 'absolute', right: 140, top: 900, height: 280, transform: `scale(${sp(frame, offT + 0.3)})`, filter: 'drop-shadow(0 0 0 #fff) drop-shadow(0 12px 18px rgba(0,0,0,0.4))', zIndex: 39}} />
       </Show>
       {/* hook sticker */}
       <Show from={0} to={T(d, ['reveal'])}>
-        <div style={{position: 'absolute', left: 540, top: 330, transform: `translateX(-50%) scale(${sp(frame, 0.05)}) rotate(-2deg)`, background: '#fff', color: N.ink, fontFamily: FONT.body, fontWeight: 800, fontSize: 60, padding: '16px 34px', borderRadius: 18, whiteSpace: 'nowrap', boxShadow: '0 10px 30px rgba(0,0,0,0.25)', zIndex: 40}}>Grandparents, <span style={{color: '#E2405B'}}>this one’s for you</span> 🎁</div>
+        <div style={{position: 'absolute', left: 540, top: 330, transform: `translateX(-50%) scale(${sp(frame, 0.05)}) rotate(-2deg)`, background: L.bg, color: L.ink, fontFamily: FONT.body, fontWeight: 800, fontSize: 60, padding: '16px 34px', borderRadius: 18, whiteSpace: 'nowrap', boxShadow: '0 10px 30px rgba(0,0,0,0.25)', zIndex: 40}}>Grandparents, <span style={{color: L.forest}}>this one’s for you</span> 🎁</div>
       </Show>
       <Grain amount={0.05} vignette={0.25} />
-      <Pill text="AI host" at={0.2} x={90} y={1140} bg="rgba(0,0,0,0.45)" color="#fff" size={28} font={FONT.body} />
-      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 54, weight: 800, color: '#ffffff', active: '#FFD84D', bg: null, y: 1236, shadow: '0 0 8px #000, 3px 3px 0 #000, -2px -2px 0 #000'}} />
-      <EndCard at={end} theme={{bg: '#FFF4E6', fg: N.ink, accent: '#E2405B', btnBg: '#E2405B', btnFg: '#fff', logo: 'full'}} kicker="Cyber Week · up to" big="50% OFF" sub="Order early for Christmas" products={spec.endProducts} />
+      <Pill text="AI host" at={0.2} x={90} y={1140} bg="rgba(31,74,50,0.75)" color={L.cream} size={28} font={FONT.body} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 52, weight: 800, ...LIGHT_CAPTIONS, y: 1236}} />
+      <EndCard at={end} theme={LIGHT_END} kicker="Cyber Week · up to" big="50% OFF" sub="Order early for Christmas" products={spec.endProducts} />
     </AbsoluteFill>
   );
 };
@@ -630,8 +658,9 @@ const InfoReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
   const q1 = T(d, ['q1']), offT = T(d, ['offer']), closeT = T(d, ['close']);
   const rows = spec.rows as {line: string; icon: string; title: string; sub: string}[];
   return (
-    <AbsoluteFill style={{background: N.cream}}>
-      <AbsoluteFill style={{backgroundImage: `radial-gradient(rgba(31,74,50,0.10) 2px, transparent 2.5px)`, backgroundSize: '34px 34px'}} />
+    <AbsoluteFill>
+      <BrandBG />
+      <HookClip spec={spec} d={d} />
       {/* hook: Maya clip in a card */}
       <Show from={0} to={q1 + 0.3}>
         <div style={{position: 'absolute', left: 90, top: 280, width: 900, height: 1060, borderRadius: 40, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.25)', transform: `scale(${t < q1 ? 1 : interpolate(frame, [fr(q1), fr(q1 + 0.3)], [1, 0.2], cl)})`, transformOrigin: '88% 8%'}}>
@@ -661,13 +690,13 @@ const InfoReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
       </Show>
       {/* offer */}
       <Show from={offT} to={end}>
-        <AbsoluteFill style={{background: N.forest}} />
-        <div style={{position: 'absolute', top: 290, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, fontSize: 44, letterSpacing: 4, color: N.cream}}>JOBST · SIGVARIS</div>
+        <BrandBG flip />
+        <div style={{position: 'absolute', top: 290, width: '100%', textAlign: 'center', fontFamily: FONT.body, fontWeight: 800, fontSize: 44, letterSpacing: 4, color: L.forest}}>JOBST · SIGVARIS</div>
         <Cut p={spec.socks[0]} x={330} y={380} h={560} at={offT + 0.05} rot={-6} />
         <Cut p={spec.socks[1]} x={750} y={380} h={560} at={offT + 0.15} rot={6} />
-        <div style={{position: 'absolute', top: 960, width: '100%', textAlign: 'center', fontFamily: FONT.display, color: N.mustard, fontSize: 108, transform: `scale(${sp(frame, T(d, ['offer', '$']))})`}}><span style={{display: 'inline-flex', gap: 16}}>SAVE UP TO <Odo value={spec.save} at={T(d, ['offer', '$'])} h={124} /></span></div>
-        {t >= closeT && <div style={{position: 'absolute', left: 90, top: 1100, width: 900, textAlign: 'center', fontFamily: FONT.body, fontWeight: 700, fontSize: 32, color: N.cream, opacity: sp(frame, closeT)}}>Backorders may happen during the year-end rush. Order early.</div>}
-        <div style={{position: 'absolute', left: 80, top: 1160, width: 920, textAlign: 'center', fontFamily: FONT.body, fontWeight: 600, fontSize: 26, color: 'rgba(251,246,236,0.8)'}}>May be covered by your health plan. Check with your provider.</div>
+        <div style={{position: 'absolute', top: 960, width: '100%', textAlign: 'center', fontFamily: FONT.display, color: L.forest, fontSize: 108, transform: `scale(${sp(frame, T(d, ['offer', '$']))})`}}><span style={{display: 'inline-flex', gap: 16}}>SAVE UP TO <Odo value={spec.save} at={T(d, ['offer', '$'])} h={124} /></span></div>
+        {t >= closeT && <div style={{position: 'absolute', left: 90, top: 1100, width: 900, textAlign: 'center', fontFamily: FONT.body, fontWeight: 700, fontSize: 32, color: L.ink, opacity: sp(frame, closeT)}}>Backorders may happen during the year-end rush. Order early.</div>}
+        <div style={{position: 'absolute', left: 80, top: 1160, width: 920, textAlign: 'center', fontFamily: FONT.body, fontWeight: 600, fontSize: 26, color: L.forest}}>May be covered by your health plan. Check with your provider.</div>
       </Show>
       {/* host picture-in-picture during the checklist */}
       <Show from={q1 + 0.2} to={offT}>
@@ -675,8 +704,8 @@ const InfoReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
           <Sequence from={fr(q1 + 0.2)} durationInFrames={Math.max(1, fr(offT) - fr(q1 + 0.2))}><OffthreadVideo src={src(spec.clips.b)} muted style={{width: 190, height: 338, objectFit: 'cover', marginTop: -40}} /></Sequence>
         </div>
       </Show>
-      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 46, weight: 800, color: N.ink, active: N.forest, bg: '#ffffff', y: 1236}} maxChars={30} />
-      <EndCard at={end} theme={{bg: N.cream, fg: N.ink, accent: N.forest, btnBg: N.forest, btnFg: N.cream, logo: 'full'}} kicker="Use your benefits before year end" big={`UP TO $${spec.save}`} sub="off JOBST & Sigvaris" note="May be covered by your health plan. Check with your provider." products={spec.endProducts} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 46, weight: 800, ...LIGHT_CAPTIONS, y: 1236}} maxChars={30} />
+      <EndCard at={end} theme={LIGHT_END} kicker="Use your benefits before year end" big={`UP TO $${spec.save}`} sub="off JOBST & Sigvaris" note="May be covered by your health plan. Check with your provider." products={spec.endProducts} />
     </AbsoluteFill>
   );
 };
@@ -695,7 +724,7 @@ const HeartBurst: React.FC<{at: number; x: number; y: number}> = ({at, x, y}) =>
       {[...Array(14)].map((_, i) => {
         const a = (i / 14) * Math.PI * 2 + random(`hb${i}`) * 0.4;
         const r = 120 + k * (520 + random(`hr${i}`) * 300);
-        return <div key={i} style={{position: 'absolute', left: x + Math.cos(a) * r - 40, top: y + Math.sin(a) * r - 40 - k * 200, opacity: 1 - k / 1.2, transform: `rotate(${(random(`ht${i}`) - 0.5) * 60}deg) scale(${0.6 + random(`hs${i}`) * 0.8})`, zIndex: 70}}><Heart size={80} color={i % 3 ? '#ff4d7d' : '#ffd23f'} /></div>;
+        return <div key={i} style={{position: 'absolute', left: x + Math.cos(a) * r - 40, top: y + Math.sin(a) * r - 40 - k * 200, opacity: 1 - k / 1.2, transform: `rotate(${(random(`ht${i}`) - 0.5) * 60}deg) scale(${0.6 + random(`hs${i}`) * 0.8})`, zIndex: 70}}><Heart size={80} color={i % 3 ? L.mustard : L.forest} /></div>;
       })}
     </>
   );
@@ -706,14 +735,14 @@ const PartyBG: React.FC = () => {
   const beat = Math.exp(-((t % 0.469) / 0.09));
   return (
     <AbsoluteFill style={{overflow: 'hidden'}}>
-      <AbsoluteFill style={{background: `linear-gradient(${150 + Math.sin(t * 0.8) * 25}deg, #ff3d7f 0%, #8a3ffc 55%, #ff9f1c 100%)`}} />
-      {[...Array(6)].map((_, i) => (
-        <div key={i} style={{position: 'absolute', left: 540 + Math.sin(t * 0.7 + i * 1.7) * 420 - 260, top: 960 + Math.cos(t * 0.5 + i * 2.3) * 760 - 260, width: 520, height: 520, borderRadius: 999, background: ['#ffd23f', '#00e0c6', '#ff4d7d', '#ffffff', '#7b5cff', '#ff9f1c'][i], opacity: 0.22 + beat * 0.08, filter: 'blur(70px)'}} />
+      <BrandBG />
+      {[...Array(4)].map((_, i) => (
+        <div key={i} style={{position: 'absolute', left: 540 + Math.sin(t * 0.7 + i * 1.7) * 420 - 220, top: 960 + Math.cos(t * 0.5 + i * 2.3) * 760 - 220, width: 440, height: 440, borderRadius: 999, background: [L.mustard, L.sageDeep, L.mustard, L.sageDeep][i], opacity: 0.12 + beat * 0.06, filter: 'blur(80px)'}} />
       ))}
       {[...Array(40)].map((_, i) => {
         const x = (random(`sx${i}`) * 1080 + Math.sin(t + i) * 30) % 1080;
         const y = ((random(`sy${i}`) * 1920 + t * (90 + random(`sv${i}`) * 120)) % 2000) - 40;
-        return <div key={i} style={{position: 'absolute', left: x, top: y, width: 10, height: 10, borderRadius: 9, background: '#fff', opacity: 0.7}} />;
+        return <div key={i} style={{position: 'absolute', left: x, top: y, width: 10, height: 10, borderRadius: 9, background: i % 2 ? L.mustard : L.sageDeep, opacity: 0.55}} />;
       })}
     </AbsoluteFill>
   );
@@ -727,18 +756,18 @@ const SwipeCard: React.FC<{photo: string; name: string; sub: string; chips: {tex
   const oe = o * o;
   const kb = 1.04 + (t - inAt) * 0.02;
   return (
-    <div style={{position: 'absolute', left: 120, top: 330, width: 840, height: 1120, borderRadius: 44, overflow: 'hidden', background: '#111', boxShadow: '0 40px 80px rgba(0,0,0,0.45)', transform: `translateX(${oe * 1300 * dir}px) rotate(${oe * 24 * dir + (1 - s.s) * -6}deg) scale(${s.s})`, opacity: s.o, zIndex: 30}}>
+    <div style={{position: 'absolute', left: 120, top: 330, width: 840, height: 1120, borderRadius: 44, overflow: 'hidden', background: L.forest, border: `10px solid ${L.white}`, boxShadow: '0 40px 80px rgba(31,74,50,0.3)', transform: `translateX(${oe * 1300 * dir}px) rotate(${oe * 24 * dir + (1 - s.s) * -6}deg) scale(${s.s})`, opacity: s.o, zIndex: 30}}>
       <Img src={src(photo)} style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${kb})`}} />
-      <AbsoluteFill style={{background: 'linear-gradient(transparent 45%, rgba(0,0,0,0.8))'}} />
+      <AbsoluteFill style={{background: 'linear-gradient(transparent 45%, rgba(20,53,35,0.88))'}} />
       <div style={{position: 'absolute', left: 44, bottom: 230, color: '#fff', fontFamily: FONT.display, fontSize: 92, lineHeight: 1}}>{name}</div>
-      <div style={{position: 'absolute', left: 48, bottom: 180, color: '#ffe3ef', fontFamily: FONT.body, fontWeight: 800, fontSize: 40}}>{sub}</div>
+      <div style={{position: 'absolute', left: 48, bottom: 180, color: L.mustard, fontFamily: FONT.body, fontWeight: 800, fontSize: 40}}>{sub}</div>
       <div style={{position: 'absolute', left: 44, bottom: 40, right: 44, display: 'flex', flexWrap: 'wrap', gap: 14}}>
         {chips.map((c) => {
           const k = sp(frame, c.at, {damping: 9, stiffness: 260, mass: 0.5});
-          return t >= c.at ? <div key={c.text} style={{transform: `scale(${k})`, background: accent, color: '#fff', fontFamily: FONT.body, fontWeight: 800, fontSize: 38, padding: '10px 24px', borderRadius: 999, border: '4px solid #fff'}}>✓ {c.text}</div> : null;
+          return t >= c.at ? <div key={c.text} style={{transform: `scale(${k})`, background: accent, color: accent === L.mustard ? L.forestDeep : L.cream, fontFamily: FONT.body, fontWeight: 800, fontSize: 38, padding: '10px 24px', borderRadius: 999, border: `4px solid ${L.cream}`}}>✓ {c.text}</div> : null;
         })}
       </div>
-      {o > 0 && <div style={{position: 'absolute', left: 60, top: 80, transform: `rotate(-14deg) scale(${1.6 - 0.6 * Math.min(1, o * 3)})`, border: '10px solid #2bd96b', color: '#2bd96b', fontFamily: FONT.display, fontSize: 120, padding: '0 28px', borderRadius: 18, background: 'rgba(255,255,255,0.85)'}}>LIKE</div>}
+      {o > 0 && <div style={{position: 'absolute', left: 60, top: 80, transform: `rotate(-14deg) scale(${1.6 - 0.6 * Math.min(1, o * 3)})`, border: `10px solid ${L.forest}`, color: L.forest, fontFamily: FONT.display, fontSize: 120, padding: '0 28px', borderRadius: 18, background: 'rgba(255,255,255,0.85)'}}>LIKE</div>}
     </div>
   );
 };
@@ -753,37 +782,38 @@ const SwipeReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
     const s = slam(frame, at, 2.6);
     const df = frame - fr(at);
     const shk = df >= 6 && df < 14 ? 12 * Math.exp(-(df - 6) / 2) * Math.sin(df * 3) : 0;
-    return <div style={{position: 'absolute', top: y, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: size, lineHeight: 0.92, color, transform: `translateX(${shk}px) scale(${s.s}) rotate(${rot}deg)`, opacity: s.o, textShadow: '0 10px 0 rgba(0,0,0,0.25)', whiteSpace: 'pre', zIndex: 40}}>{txt}</div>;
+    return <div style={{position: 'absolute', top: y, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: size, lineHeight: 0.92, color, transform: `translateX(${shk}px) scale(${s.s}) rotate(${rot}deg)`, opacity: s.o, textShadow: '0 8px 0 rgba(31,74,50,0.12)', whiteSpace: 'pre', zIndex: 40}}>{txt}</div>;
   };
   return (
     <AbsoluteFill>
       <PartyBG />
+      <HookClip spec={spec} d={d} />
       {/* HOOK: three hard cuts */}
-      {t < decT && shout('WAIT!', 0, 620, 300, '#ffffff')}
-      {t >= decT && t < noT && shout("IT'S\nDECEMBER", decT, 540, 160, '#ffffff', 3)}
+      {t < decT && shout('WAIT!', 0, 620, 300, L.forest)}
+      {t >= decT && t < noT && shout("IT'S\nDECEMBER", decT, 540, 160, L.forest, 3)}
       {t >= noT && t < dateT && (
         <>
-          {shout('NO TREE?!', noT, 420, 190, '#ffd23f')}
+          {shout('NO TREE?!', noT, 420, 168, L.mustardDeep)}
           <svg width={420} height={640} viewBox="0 0 100 150" style={{position: 'absolute', left: 330, top: 700, transform: `rotate(${Math.sin(t * 18) * 3}deg)`, zIndex: 35}}>
-            <path d="M50 8 L78 58 L64 58 L88 98 L70 98 L94 138 L6 138 L30 98 L12 98 L36 58 L22 58 Z" fill="none" stroke="#fff" strokeWidth={4} strokeDasharray="8 7" />
-            <text x={50} y={110} textAnchor="middle" fontSize={44} fontFamily="Archivo Black" fill="#fff">?</text>
+            <path d="M50 8 L78 58 L64 58 L88 98 L70 98 L94 138 L6 138 L30 98 L12 98 L36 58 L22 58 Z" fill="none" stroke={L.forest} strokeWidth={4} strokeDasharray="8 7" />
+            <text x={50} y={110} textAnchor="middle" fontSize={44} fontFamily="Archivo Black" fill={L.forest}>?</text>
           </svg>
         </>
       )}
       {/* DATE: app intro */}
       {t >= dateT && t < aT && (
         <>
-          {shout("LET'S\nSPEED-DATE", dateT, 470, 136, '#ffffff')}
-          <div style={{position: 'absolute', left: 540, top: 900, transform: `translateX(-50%) scale(${0.5 + 0.5 * sp(frame, dateT + 0.15)}) rotate(${Math.sin(t * 9) * 6}deg)`, zIndex: 41}}><Heart size={300} color="#ff4d7d" /></div>
+          {shout("LET'S\nSPEED-DATE", dateT, 470, 136, L.forest)}
+          <div style={{position: 'absolute', left: 540, top: 900, transform: `translateX(-50%) scale(${0.5 + 0.5 * sp(frame, dateT + 0.15)}) rotate(${Math.sin(t * 9) * 6}deg)`, zIndex: 41}}><Heart size={300} color={L.mustard} /></div>
         </>
       )}
       {/* CARDS */}
-      <SwipeCard photo={A.photo} name={A.name} sub={A.sub} accent="#ff4d7d" dir={1} inAt={aT} outAt={bT - 0.4} chips={A.chips.map((c: any) => ({text: c.text, at: T(d, c.at)}))} />
+      <SwipeCard photo={A.photo} name={A.name} sub={A.sub} accent={L.mustard} dir={1} inAt={aT} outAt={bT - 0.4} chips={A.chips.map((c: any) => ({text: c.text, at: T(d, c.at)}))} />
       <HeartBurst at={bT - 0.3} x={540} y={800} />
-      <SwipeCard photo={B.photo} name={B.name} sub={B.sub} accent="#8a3ffc" dir={1} inAt={bT} outAt={askT - 0.35} chips={B.chips.map((c: any) => ({text: c.text, at: T(d, c.at)}))} />
+      <SwipeCard photo={B.photo} name={B.name} sub={B.sub} accent={L.forest} dir={1} inAt={bT} outAt={askT - 0.35} chips={B.chips.map((c: any) => ({text: c.text, at: T(d, c.at)}))} />
       <HeartBurst at={askT - 0.25} x={540} y={800} />
       {t >= aT && t < askT && (
-        <div style={{position: 'absolute', top: 210, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: 64, color: '#fff', zIndex: 45, textShadow: '0 6px 0 rgba(0,0,0,0.25)'}}>{t < bT ? 'TREE A' : 'TREE B'}</div>
+        <div style={{position: 'absolute', top: 210, width: '100%', textAlign: 'center', fontFamily: FONT.display, fontSize: 64, color: L.forest, zIndex: 45}}>{t < bT ? 'TREE A' : 'TREE B'}</div>
       )}
       {/* ASK */}
       {t >= askT && t < offT && (
@@ -792,14 +822,14 @@ const SwipeReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
             const k = slam(frame, askT + i * 0.08, 1.8);
             const hi = Math.floor(t * 4) % 2 === i;
             return (
-              <div key={i} style={{position: 'absolute', left: i ? 560 : 60, top: 560, width: 460, height: 640, borderRadius: 30, overflow: 'hidden', border: `10px solid ${hi ? '#ffd23f' : '#fff'}`, transform: `rotate(${i ? 5 : -5}deg) scale(${k.s * (hi ? 1.04 : 1)})`, opacity: k.o, boxShadow: '0 30px 60px rgba(0,0,0,0.4)', zIndex: 30}}>
+              <div key={i} style={{position: 'absolute', left: i ? 560 : 60, top: 560, width: 460, height: 640, borderRadius: 30, overflow: 'hidden', border: `10px solid ${hi ? L.mustard : L.white}`, transform: `rotate(${i ? 5 : -5}deg) scale(${k.s * (hi ? 1.04 : 1)})`, opacity: k.o, boxShadow: '0 30px 60px rgba(31,74,50,0.25)', zIndex: 30}}>
                 <Img src={src(c.photo)} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, background: i ? '#8a3ffc' : '#ff4d7d', color: '#fff', textAlign: 'center', fontFamily: FONT.display, fontSize: 110}}>{i ? 'B' : 'A'}</div>
+                <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, background: i ? L.forest : L.mustard, color: i ? L.cream : L.forestDeep, textAlign: 'center', fontFamily: FONT.display, fontSize: 110}}>{i ? 'B' : 'A'}</div>
               </div>
             );
           })}
-          {shout('A OR B?', askT, 300, 190, '#ffffff')}
-          <div style={{position: 'absolute', left: 540, top: 1230, transform: `translateX(-50%) translateY(${Math.abs(Math.sin(t * 7)) * -26}px) scale(${sp(frame, askT + 0.2)})`, background: '#fff', color: '#2b1e2f', fontFamily: FONT.display, fontSize: 56, padding: '14px 36px', borderRadius: 999, zIndex: 50, whiteSpace: 'nowrap'}}>COMMENT NOW 💬</div>
+          {shout('A OR B?', askT, 300, 190, L.forest)}
+          <div style={{position: 'absolute', left: 540, top: 1230, transform: `translateX(-50%) translateY(${Math.abs(Math.sin(t * 7)) * -26}px) scale(${sp(frame, askT + 0.2)})`, background: L.forest, color: L.cream, fontFamily: FONT.display, fontSize: 56, padding: '14px 36px', borderRadius: 999, zIndex: 50, whiteSpace: 'nowrap'}}>COMMENT NOW 💬</div>
         </>
       )}
       {/* OFFER: it's a match */}
@@ -807,18 +837,18 @@ const SwipeReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
         <>
           {[A, B].map((c: any, i: number) => {
             const k = slam(frame, offT + 0.05 + i * 0.1, 2);
-            return <div key={i} style={{position: 'absolute', left: i ? 520 : 180, top: 820, width: 380, height: 380, borderRadius: 999, overflow: 'hidden', border: '12px solid #fff', transform: `scale(${k.s}) rotate(${i ? 8 : -8}deg)`, opacity: k.o, zIndex: 30, boxShadow: '0 20px 50px rgba(0,0,0,0.35)'}}><Img src={src(c.photo)} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></div>;
+            return <div key={i} style={{position: 'absolute', left: i ? 520 : 180, top: 820, width: 380, height: 380, borderRadius: 999, overflow: 'hidden', border: `12px solid ${L.white}`, transform: `scale(${k.s}) rotate(${i ? 8 : -8}deg)`, opacity: k.o, zIndex: 30, boxShadow: '0 20px 50px rgba(31,74,50,0.25)'}}><Img src={src(c.photo)} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></div>;
           })}
-          <div style={{position: 'absolute', left: 540, top: 930, transform: `translateX(-50%) scale(${sp(frame, offT + 0.3) * (1 + 0.08 * Math.exp(-((t % 0.469) / 0.1)))})`, zIndex: 40}}><Heart size={200} color="#ff4d7d" /></div>
-          {shout("IT'S A DEAL!", offT, 300, 128, '#ffd23f')}
-          {shout('UP TO 50% OFF', T(d, ['offer', 'up']), 480, 104, '#ffffff', 2)}
-          {t >= T(d, ['offer', '$']) && <div style={{position: 'absolute', left: 540, top: 660, transform: `translateX(-50%) scale(${slam(frame, T(d, ['offer', '$']), 1.8).s})`, background: '#2b1e2f', color: '#fff', fontFamily: FONT.display, fontSize: 60, padding: '12px 36px', borderRadius: 999, whiteSpace: 'nowrap', display: 'flex', gap: 14, alignItems: 'center', zIndex: 45}}>SAVE UP TO <Odo value={spec.save} at={T(d, ['offer', '$'])} h={70} /></div>}
+          <div style={{position: 'absolute', left: 540, top: 930, transform: `translateX(-50%) scale(${sp(frame, offT + 0.3) * (1 + 0.08 * Math.exp(-((t % 0.469) / 0.1)))})`, zIndex: 40}}><Heart size={200} color={L.mustard} /></div>
+          {shout("IT'S A DEAL!", offT, 300, 128, L.mustardDeep)}
+          {shout('UP TO 50% OFF', T(d, ['offer', 'up']), 480, 104, L.forest, 2)}
+          {t >= T(d, ['offer', '$']) && <div style={{position: 'absolute', left: 540, top: 660, transform: `translateX(-50%) scale(${slam(frame, T(d, ['offer', '$']), 1.8).s})`, background: L.forest, color: L.cream, fontFamily: FONT.display, fontSize: 60, padding: '12px 36px', borderRadius: 999, whiteSpace: 'nowrap', display: 'flex', gap: 14, alignItems: 'center', zIndex: 45}}>SAVE UP TO <Odo value={spec.save} at={T(d, ['offer', '$'])} h={70} /></div>}
           <Confetti at={offT + 0.3} />
         </>
       )}
-      <Grain amount={0.06} vignette={0.25} />
-      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 54, weight: 800, color: '#ffffff', active: '#ffd23f', bg: null, y: 1236, shadow: '0 0 8px rgba(0,0,0,0.9), 3px 3px 0 #000, -2px -2px 0 #000'}} />
-      <EndCard at={end} theme={{bg: 'linear-gradient(150deg, #ff3d7f, #8a3ffc)', fg: '#ffffff', accent: '#ffd23f', btnBg: '#ffffff', btnFg: '#8a3ffc', logo: 'white'}} kicker="Cyber Week · up to" big="50% OFF" sub="Order early for Christmas" products={spec.endProducts} />
+      <Grain amount={0.05} vignette={0.1} />
+      <Captions lines={d.lines} hideFrom={end} style={{font: FONT.body, size: 52, weight: 800, ...LIGHT_CAPTIONS, y: 1236}} />
+      <EndCard at={end} theme={LIGHT_END} kicker="Cyber Week · up to" big="50% OFF" sub="Order early for Christmas" products={spec.endProducts} />
     </AbsoluteFill>
   );
 };
@@ -826,7 +856,7 @@ const SwipeReel: React.FC<{spec: any; d: VideoData}> = ({spec, d}) => {
 // ---------- router ----------
 export const makeDec = (spec: any, d: VideoData) => {
   const C = {glitch: GlitchReel, split: SplitReel, ba: BAReel, gta: GtaReel, game3d: GameReel, swipe: SwipeReel, ugc: UgcReel, info: InfoReel}[spec.style as string] as React.FC<{spec: any; d: VideoData}>;
-  const Comp: React.FC = () => <C spec={spec} d={d} />;
+  const Comp: React.FC = () => <BgVariant.Provider value={spec.bgVariant ?? 0}><C spec={spec} d={d} /></BgVariant.Provider>;
   return Comp;
 };
 
